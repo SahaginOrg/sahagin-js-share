@@ -106,5 +106,5 @@ sahagin.SubFunctionInvoke.prototype.fromYamlObject = function(yamlObject) {
   for (var i = 0; i < argsYamlObj.length; i++) {
     var code = sahagin.Code.newInstanceFromYamlObject(argsYamlObj[i]);
     this.args.push(code);
-  }      
+  }
 };

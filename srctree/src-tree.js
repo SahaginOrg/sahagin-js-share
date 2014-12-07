@@ -2,7 +2,7 @@
  * @class
  */
 sahagin.SrcTree = function() {
-  
+
   /**
    * @private
    * @type {sahagin.TestClassTable}
@@ -25,7 +25,7 @@ sahagin.SrcTree = function() {
    * @private
    * @type {sahagin.TestFuncTable}
    */
-  this.subFuncTable = null;  
+  this.subFuncTable = null;
 };
 
 /**
@@ -227,9 +227,9 @@ sahagin.SrcTree.prototype.resolveTestClass = function(testFunction) {
   if (!(testFunction instanceof sahagin.TestMethod)) {
     return;
   }
-  
+
   var testMethod = testFunction;
-  testMethod.setTestClass(this.getTestClassByKey(testMethod.getTestClassKey()));        
+  testMethod.setTestClass(this.getTestClassByKey(testMethod.getTestClassKey()));
 };
 
 /**
@@ -247,12 +247,10 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(testClass) {
  * @param {sahagin.Code} code
  */
 sahagin.SrcTree.prototype.resolveTestFunction = function(code) {
-  // TODO recursive resolve is required for method arguments
-  
   if (code == null || code == undefined) {
     return;
   }
-  
+
   if (code instanceof sahagin.SubMethodInvoke) {
     var invoke = code;
     var testMethod = this.getTestMethodByKey(invoke.getSubMethodKey());

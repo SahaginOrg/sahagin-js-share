@@ -70,7 +70,7 @@ sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
     result = new sahagin.SubMethodInvoke();
   } else if (type == sahagin.UnknownCode.TYPE) {
     result = new sahagin.UnknownCode();
-  } else {    
+  } else {
     throw new Error(sahagin.CommonUtils.strFormat(
         sahagin.YamlUtils.MSG_INVALID_TYPE, type));
   }

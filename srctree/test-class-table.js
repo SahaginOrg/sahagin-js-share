@@ -2,7 +2,7 @@
  * @class
  */
 sahagin.TestClassTable = function() {
-  
+
   /**
    * @private
    * @type {Array.<sahagin.TestClass>}
@@ -11,7 +11,7 @@ sahagin.TestClassTable = function() {
 };
 
 /**
- * @returns {Array.<sahagin.TestClass>} 
+ * @returns {Array.<sahagin.TestClass>}
  */
 sahagin.TestClassTable.prototype.getTestClasses = function() {
   return this.testClasses;
@@ -47,7 +47,7 @@ sahagin.TestClassTable.prototype.getByKey = function(key) {
  */
 sahagin.TestClassTable.prototype.toYamlObject = function() {
   var result = new Object();
-  result['classes'] = sahagin.YamlUtils.toYamlObjectList(this.testClasses); 
+  result['classes'] = sahagin.YamlUtils.toYamlObjectList(this.testClasses);
   return result;
 };
 

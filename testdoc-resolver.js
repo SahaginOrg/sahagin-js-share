@@ -6,7 +6,7 @@ sahagin.TestDocResolver = function() {};
 /**
  * @type {string}
  */
-sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER 
+sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER
 = 'TestDoc of "{0}" contains invalid keyword "{1}"';
 
 /**
@@ -58,7 +58,7 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(func) {
  * @returns {string}
  */
 sahagin.TestDocResolver.funcTestDocSub = function(code) {
-  if (code instanceof sahagin.StringCode) {  
+  if (code instanceof sahagin.StringCode) {
     return code.getValue();
   } else if (code instanceof sahagin.SubFunctionInvoke) {
     var funcInvoke = code;
@@ -66,7 +66,7 @@ sahagin.TestDocResolver.funcTestDocSub = function(code) {
     if (func.getTestDoc() == null) {
       return funcInvoke.getOriginal();
     }
-    
+
     // replace all placeholders by RegExp
     var matched;
     var buf = '';
@@ -88,8 +88,8 @@ sahagin.TestDocResolver.funcTestDocSub = function(code) {
             sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER,
             func.getQualifiedName(), variable));
       }
-      buf = buf + testDoc.substring(prevEnd, matchStart) 
-      + sahagin.TestDocResolver.funcTestDocSub(funcInvoke.getArgs()[varIndex]); 
+      buf = buf + testDoc.substring(prevEnd, matchStart)
+      + sahagin.TestDocResolver.funcTestDocSub(funcInvoke.getArgs()[varIndex]);
       prevEnd = matchEnd;
     }
     buf = buf + testDoc.substring(prevEnd, testDoc.length);
@@ -138,7 +138,7 @@ sahagin.TestDocResolver.methodInvokePageTestDocRecursive = function(methodInvoke
   for (var i = 0; i < methodInvoke.getArgs().length; i++) {
     var code = methodInvoke.getArgs()[i];
     if (code && code instanceof sahagin.SubMethodInvoke) {
-      var codeLinePageTestDoc 
+      var codeLinePageTestDoc
       = sahagin.TestDocResolver.methodInvokePageTestDocRecursive(code);
       if (codeLinePageTestDoc != null) {
         return codeLinePageTestDoc;

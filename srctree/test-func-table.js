@@ -10,7 +10,7 @@ sahagin.TestFuncTable = function() {
 };
 
 /**
- * @returns {Array.<sahagin.TestFunction>} 
+ * @returns {Array.<sahagin.TestFunction>}
  */
 sahagin.TestFuncTable.prototype.getTestFunctions = function() {
   return this.testFunctions;
@@ -42,7 +42,7 @@ sahagin.TestFuncTable.prototype.getByKey = function(key) {
 };
 
 /**
- * @param {string} qualifiedName 
+ * @param {string} qualifiedName
  * @return {Array.<sahagin.TestFunction>}
  */
 sahagin.TestFuncTable.prototype.getByQualifiedName = function(qualifiedName) {
@@ -64,7 +64,7 @@ sahagin.TestFuncTable.prototype.getByQualifiedName = function(qualifiedName) {
  */
 sahagin.TestFuncTable.prototype.toYamlObject = function() {
   var result = new Object();
-  result['functions'] = sahagin.YamlUtils.toYamlObjectList(this.testFunctions); 
+  result['functions'] = sahagin.YamlUtils.toYamlObjectList(this.testFunctions);
   return result;
 };
 

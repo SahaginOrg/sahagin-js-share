@@ -7,28 +7,28 @@ sahagin.TestClass = function() {
    * unique key
    * @private
    * @type {string}
-   */  
+   */
   this.key = null;
-  
+
   /**
    * class qualified name must be unique
    * @private
    * @type {string}
    */
   this.qualifiedName = null;
-  
+
   /**
    * @private
    * @type {string}
    */
   this.testDoc = null;
-  
+
   /**
    * @private
    * @type {Array.<string>}
    */
   this.testMethodKeys = new Array();
-  
+
   /**
    * @private
    * @type {Array.<sahagin.TestMethod>}
@@ -55,14 +55,14 @@ sahagin.TestClass.prototype.getKey = function() {
 };
 
 /**
- * @param {string} key 
+ * @param {string} key
  */
 sahagin.TestClass.prototype.setKey = function(key) {
   this.key = key;
 };
 
 /**
- * @returns {string} 
+ * @returns {string}
  */
 sahagin.TestClass.prototype.getSimpleName = function() {
   if (this.qualifiedName == null || this.qualifiedName == undefined) {
@@ -76,14 +76,14 @@ sahagin.TestClass.prototype.getSimpleName = function() {
 };
 
 /**
- * @returns {string} 
+ * @returns {string}
  */
 sahagin.TestClass.prototype.getQualifiedName = function() {
   return this.qualifiedName;
 };
 
 /**
- * @param {string} qualifiedName 
+ * @param {string} qualifiedName
  */
 sahagin.TestClass.prototype.setQualifiedName = function(qualifiedName) {
   this.qualifiedName = qualifiedName;
@@ -97,7 +97,7 @@ sahagin.TestClass.prototype.getTestDoc = function() {
 };
 
 /**
- * @param {string} testDoc 
+ * @param {string} testDoc
  */
 sahagin.TestClass.prototype.setTestDoc = function(testDoc) {
   this.testDoc = testDoc;
@@ -118,7 +118,7 @@ sahagin.TestClass.prototype.addTestMethodKey = function(testMethodKey) {
 };
 
 /**
- * @returns {Array.<sahagin.TestMethod>} 
+ * @returns {Array.<sahagin.TestMethod>}
  */
 sahagin.TestClass.prototype.getTestMethods = function() {
   return this.testMethods;
@@ -132,14 +132,14 @@ sahagin.TestClass.prototype.addTestMethod = function(testMethod) {
 };
 
 /**
- * 
+ *
  */
 sahagin.TestClass.prototype.clearTestMethods = function() {
   this.testMethods.length = 0;
 };
 
 /**
- * @returns {string} 
+ * @returns {string}
  */
 sahagin.TestClass.prototype.getType = function() {
   return sahagin.TestClass.TYPE;

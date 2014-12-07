@@ -2,14 +2,14 @@
  * @class
  */
 sahagin.TestFunction = function() {
-  
+
   /**
    * unique key
    * @private
    * @type {string}
    */
   this.key = null;
-  
+
   /**
    * function qualified name is not necessarily unique
    * (because of overloaded methods)
@@ -23,7 +23,7 @@ sahagin.TestFunction = function() {
    * @type {string}
    */
   this.testDoc = null;
-  
+
   /**
    * @private
    * @type {boolean}
@@ -35,12 +35,12 @@ sahagin.TestFunction = function() {
    * @type {Array.<string>}
    */
   this.argVariables = new Array();
-  
+
   /**
    * @private
    * @type {Array.<sahagin.CodeLine>}
    */
-  this.codeBody = new Array();  
+  this.codeBody = new Array();
 };
 
 /**
@@ -69,7 +69,7 @@ sahagin.TestFunction.prototype.setKey = function(key) {
 };
 
 /**
- * @returns {string} 
+ * @returns {string}
  */
 sahagin.TestFunction.prototype.getSimpleName = function() {
   if (this.qualifiedName == null || this.qualifiedName == undefined) {
@@ -83,14 +83,14 @@ sahagin.TestFunction.prototype.getSimpleName = function() {
 };
 
 /**
- * @returns {string} 
+ * @returns {string}
  */
 sahagin.TestFunction.prototype.getQualifiedName = function() {
   return this.qualifiedName;
 };
 
 /**
- * @param {string} qualifiedName 
+ * @param {string} qualifiedName
  */
 sahagin.TestFunction.prototype.setQualifiedName = function(qualifiedName) {
   this.qualifiedName = qualifiedName;
@@ -153,7 +153,7 @@ sahagin.TestFunction.prototype.addCodeBody = function(codeLine) {
 };
 
 /**
- * @returns {string} 
+ * @returns {string}
  */
 sahagin.TestFunction.prototype.getType = function() {
   return sahagin.TestFunction.TYPE;
@@ -205,7 +205,7 @@ sahagin.TestFunction.newInstanceFromYamlObject = function(yamlObject) {
     result = new sahagin.TestMethod();
   } else {
     throw new Error(sahagin.CommonUtils.strFormat(
-        sahagin.TestFunction.MSG_INVALID_TYPE, type));     
+        sahagin.TestFunction.MSG_INVALID_TYPE, type));
   }
   result.fromYamlObject(yamlObject);
   return result;
