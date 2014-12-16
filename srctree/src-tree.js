@@ -255,6 +255,7 @@ sahagin.SrcTree.prototype.resolveTestFunction = function(code) {
     var invoke = code;
     var testMethod = this.getTestMethodByKey(invoke.getSubMethodKey());
     invoke.setSubMethod(testMethod);
+    this.resolveTestFunction(invoke.getThisInstance());
     for (var i = 0; i < invoke.getArgs().length; i++) {
       this.resolveTestFunction(invoke.getArgs()[i]);
     }
@@ -262,7 +263,6 @@ sahagin.SrcTree.prototype.resolveTestFunction = function(code) {
     var invoke = code;
     var testFunction = this.getTestFunctionByKey(invoke.getSubFunctionKey());
     invoke.setSubFunction(testFunction);
-    this.resolveTestFunction(invoke.getThisInstance());
     for (var i = 0; i < invoke.getArgs().length; i++) {
       this.resolveTestFunction(invoke.getArgs()[i]);
     }
