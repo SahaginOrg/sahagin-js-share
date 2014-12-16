@@ -10,6 +10,12 @@ sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER
 = 'TestDoc of "{0}" contains invalid keyword "{1}"';
 
 /**
+ * @type {string}
+ */
+sahagin.TestDocResolver.MSG_THIS_FOR_FUNCTION
+= 'Can not use "this" keyword for function';
+
+/**
  * @private
  * @returns {RegExp}
  */
@@ -41,7 +47,9 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(func) {
     var varIndex = parseInt(variable, 10);
     if (isNaN(varIndex)) {
       // not index pattern
-      if (func.getArgVariables().indexOf(variable) == -1) {
+      if (matched == "this") {
+        continue;
+      } else if (func.getArgVariables().indexOf(variable) == -1) {
         return variable;
       }
     } else {
@@ -78,22 +86,44 @@ sahagin.TestDocResolver.funcTestDocSub = function(code) {
       var matchStart = matched.index;
       var matchEnd = matchStart + variable.length;
       variable = variable.substring(1, variable.length - 1); // trim head and tail braces
+      var isIndexPattern = false;
       var varIndex = parseInt(variable, 10);
-      if (isNaN(varIndex)) {
-        // not index pattern
-        varIndex = func.getArgVariables().indexOf(variable);
+      if (!isNaN(varIndex)) {
+        isIndexPattern = true;
       }
-      if (varIndex < 0 || varIndex >= funcInvoke.getArgs().length) {
-        throw new Error(sahagin.CommonUtils.strFormat(
-            sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER,
-            func.getQualifiedName(), variable));
+
+      var variableCode;
+      if (!isIndexPattern && variable == "this") {
+        if (!(funcInvoke instanceof sahagin.SubMethodInvoke)) {
+          throw new Error(sahagin.TestDocResolver.MSG_THIS_FOR_FUNCTION);
+        }
+        var methodInvoke = funcInvoke;
+        variableCode = methodInvoke.getThisInstance();
+        if (variableCode == null) {
+          // When called inside the class on which this method is defined,
+          // set the class name for {this} keyword
+          variableCode = new sahagin.UnknownCode();
+          variableCode.setOriginal(methodInvoke.getSubMethod().getTestClass().getSimpleName());
+        }
+      } else {
+        if (!isIndexPattern) {
+          varIndex = func.getArgVariables().indexOf(variable);
+        }
+        if (varIndex < 0 || varIndex >= funcInvoke.getArgs().length) {
+          throw new Error(sahagin.CommonUtils.strFormat(
+              sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER,
+              func.getQualifiedName(), variable));
+        }
+        variableCode = funcInvoke.getArgs()[varIndex];
       }
       buf = buf + testDoc.substring(prevEnd, matchStart)
-      + sahagin.TestDocResolver.funcTestDocSub(funcInvoke.getArgs()[varIndex]);
+      + sahagin.TestDocResolver.funcTestDocSub(variableCode);
       prevEnd = matchEnd;
     }
     buf = buf + testDoc.substring(prevEnd, testDoc.length);
     return buf;
+  } else {
+    return code.getOriginal();
   }
 };
 

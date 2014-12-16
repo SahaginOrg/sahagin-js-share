@@ -1,7 +1,5 @@
 sahagin.YamlUtils = {};
 
-// TODO support allowsEmpty switch like YamlUtils.java
-
 /**
  * @private
  */
@@ -26,15 +24,23 @@ sahagin.YamlUtils.MSG_NOT_EQUALS_TO_EXPECTED = '"{0}" is not equals to "{1}"';
 /**
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
+ * @param {boolean} allowsEmpty default false
  * @returns {Object}
  */
-sahagin.YamlUtils.getObjectValue = function(yamlObject, key) {
+sahagin.YamlUtils.getObjectValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
   if (!yamlObject) {
     throw new Error('empty yamlObject: ' + yamlObject);
   }
   if (!(key in yamlObject)) {
-    throw new Error(sahagin.CommonUtils.strFormat(
-        sahagin.YamlUtils.MSG_KEY_NOT_FOUND, key));
+    if (allowsEmpty) {
+      return null;
+    } else {
+      throw new Error(sahagin.CommonUtils.strFormat(
+          sahagin.YamlUtils.MSG_KEY_NOT_FOUND, key));
+    }
   }
   return yamlObject[key];
 };
@@ -42,11 +48,22 @@ sahagin.YamlUtils.getObjectValue = function(yamlObject, key) {
 /**
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
+ * @param {boolean} allowsEmpty default false
  * @returns {boolean}
  */
-sahagin.YamlUtils.getBooleanValue = function(yamlObject, key) {
-  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key);
-  if (obj === true) {
+sahagin.YamlUtils.getBooleanValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
+  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
+  if (obj === null) {
+    if (allowsEmpty) {
+      return null;
+    } else {
+      throw new Error(sahagin.CommonUtils.strFormat(
+          sahagin.YamlUtils.MSG_MUST_BE_BOOLEAN, key, obj));
+    }
+  } else if (obj === true) {
     return true;
   } else if (obj === false) {
     return false;
@@ -59,10 +76,14 @@ sahagin.YamlUtils.getBooleanValue = function(yamlObject, key) {
 /**
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
+ * @param {boolean} allowsEmpty default false
  * @returns {string}
  */
-sahagin.YamlUtils.getStrValue = function(yamlObject, key) {
-  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key);
+sahagin.YamlUtils.getStrValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
+  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
   if (obj === null || obj === undefined) {
     return obj;
   } else {
@@ -84,51 +105,78 @@ sahagin.YamlUtils.strValueEqualsCheck = function(yamlObject, key, expected) {
 };
 
 /**
- * returns empty list if the value the specified key is null.
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
- * @returns {Array.<string>}
- */
-sahagin.YamlUtils.getStrListValue = function(yamlObject, key) {
-  // assume the returned object is string Array
-  return sahagin.YamlUtils.getObjectValue(yamlObject, key);
-};
-
-/**
- * returns empty map if the value the specified key is null.
- * @param {Object.<string, *>} yamlObject
- * @param {string} key
- * @returns {Object.<string, *>}
- */
-sahagin.YamlUtils.getYamlObjectValue = function(yamlObject, key) {
-  // assume the returned object is YAML object
-  return sahagin.YamlUtils.getObjectValue(yamlObject, key);
-};
-
-/**
- * returns empty map if the value the specified key is null.
- * @param {Object.<string, *>} yamlObject
- * @param {string} key
- * @returns {Array.<Object.<string, *>>} array of YAML object
- */
-sahagin.YamlUtils.getYamlObjectListValue = function(yamlObject, key) {
-  // assume the returned object is YAML object list
-  return sahagin.YamlUtils.getObjectValue(yamlObject, key);
-};
-
-/**
- * @param {Object.<string, *>} yamlObject
- * @param {string} key
+ * @param {boolean} allowsEmpty default false
  * @returns {number}
  */
-sahagin.YamlUtils.getIntValue = function(yamlObject, key) {
-  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key);
+sahagin.YamlUtils.getIntValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
+  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
+  if (obj === null && allowsEmpty) {
+    return null;
+  }
   var num = parseInt(obj, 10);
   if (isNaN(num)) {
     throw new Error(sahagin.CommonUtils.strFormat(
         sahagin.YamlUtils.MSG_VALUE_NOT_INT, key, obj));
   }
   return num;
+};
+
+/**
+ * returns empty map if the value the specified key is null.
+ * @param {Object.<string, *>} yamlObject
+ * @param {string} key
+ * @param {boolean} allowsEmpty default false
+ * @returns {Object.<string, *>}
+ */
+sahagin.YamlUtils.getYamlObjectValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
+  // assume the returned object is YAML object
+  return sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
+};
+
+/**
+ * returns empty list if the value the specified key is null.
+ * @param {Object.<string, *>} yamlObject
+ * @param {string} key
+ * @param {boolean} allowsEmpty default false
+ * @returns {Array.<string>}
+ */
+sahagin.YamlUtils.getStrListValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
+  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
+  if (obj === null) {
+    return new Array();
+  }
+  // assume the returned object is string Array
+  return obj;
+};
+
+/**
+ * returns empty map if the value the specified key is null.
+ * @param {Object.<string, *>} yamlObject
+ * @param {string} key
+ * @param {boolean} allowsEmpty default false
+ * @returns {Array.<Object.<string, *>>} array of YAML object
+ */
+sahagin.YamlUtils.getYamlObjectListValue = function(yamlObject, key, allowsEmpty) {
+  if (typeof allowsEmpty === 'undefined') {
+    allowsEmpty = false;
+  }
+  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key);
+  if (obj === null) {
+    return new Array();
+  }
+  // assume the returned object is YAML object list
+  return obj;
 };
 
 /**

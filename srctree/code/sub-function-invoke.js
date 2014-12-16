@@ -50,7 +50,7 @@ sahagin.SubFunctionInvoke.prototype.getSubFunction = function() {
 };
 
 /**
- * @param {sahagin.TestFunction}
+ * @param {sahagin.TestFunction} subFunction
  */
 sahagin.SubFunctionInvoke.prototype.setSubFunction = function(subFunction) {
   this.subFunction = subFunction;
