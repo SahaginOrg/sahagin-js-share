@@ -63,11 +63,16 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(func) {
  * Returns original source code if TestDoc is not found
  * @private
  * @param {sahagin.Code} code
+ * @param {Array.<string>} placeholderResolvedParentFuncArgTestDocs
  * @returns {string}
  */
-sahagin.TestDocResolver.funcTestDocSub = function(code) {
+sahagin.TestDocResolver.funcTestDocSub = function(
+    code, placeholderResolvedParentFuncArgTestDocs) {
   if (code instanceof sahagin.StringCode) {
     return code.getValue();
+  } else if (code instanceof sahagin.FuncArgument) {
+    var funcArg = code;
+    return placeholderResolvedParentFuncArgTestDocs[funcArg.getArgIndex()];
   } else if (code instanceof sahagin.SubFunctionInvoke) {
     var funcInvoke = code;
     var func = funcInvoke.getSubFunction();
@@ -117,7 +122,8 @@ sahagin.TestDocResolver.funcTestDocSub = function(code) {
         variableCode = funcInvoke.getArgs()[varIndex];
       }
       buf = buf + testDoc.substring(prevEnd, matchStart)
-      + sahagin.TestDocResolver.funcTestDocSub(variableCode);
+      + sahagin.TestDocResolver.funcTestDocSub(
+          variableCode, placeholderResolvedParentFuncArgTestDocs);
       prevEnd = matchEnd;
     }
     buf = buf + testDoc.substring(prevEnd, testDoc.length);
@@ -129,13 +135,37 @@ sahagin.TestDocResolver.funcTestDocSub = function(code) {
 
 /**
  * @param {sahagin.Code} code
+ * @param {Array.<string>} placeholderResolvedParentFuncArgTestDocs
+ * @returns {Array.<string>}
+ */
+sahagin.TestDocResolver.placeholderResolvedFuncArgTestDocs = function(
+    code, placeholderResolvedParentFuncArgTestDocs) {
+  if (!(code instanceof sahagin.SubFunctionInvoke)) {
+    return new Array();
+  }
+  var funcInvoke = code;
+  var result = new Array();
+  for (var i = 0; i < funcInvoke.getArgs().length; i++) {
+    var code = funcInvoke.getArgs()[i];
+    var argStr = sahagin.TestDocResolver.funcTestDocSub(
+        code, placeholderResolvedParentFuncArgTestDocs);
+    result.push(argStr);
+  }
+  return result;
+};
+
+/**
+ * @param {sahagin.Code} code
+ * @param {Array.<string>} placeholderResolvedParentFuncArgTestDocs
  * @returns {string}
  */
-sahagin.TestDocResolver.placeholderResolvedFuncTestDoc = function(code) {
+sahagin.TestDocResolver.placeholderResolvedFuncTestDoc = function(
+    code, placeholderResolvedParentFuncArgTestDocs) {
   if (code instanceof sahagin.UnknownCode) {
     return null; // TestDoc for UnknownCode is null
   } else {
-    return sahagin.TestDocResolver.funcTestDocSub(code);
+    return sahagin.TestDocResolver.funcTestDocSub(
+        code, placeholderResolvedParentFuncArgTestDocs);
   }
 };
 

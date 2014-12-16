@@ -13,13 +13,13 @@ sahagin.Code = function() {
 /**
  * @private
  */
-sahagin.MSG_INVALID_TYPE = 'invalid type: {0}';
+sahagin.Code.MSG_INVALID_TYPE = 'invalid type: {0}';
 
 /**
  * @returns {string}
  */
 sahagin.Code.prototype.getOriginal = function() {
-  return this.original;	
+  return this.original;
 };
 
 /**
@@ -64,6 +64,8 @@ sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
   var result;
   if (type == sahagin.StringCode.TYPE) {
     result = new sahagin.StringCode();
+  } else if (type == sahagin.FuncArgument.TYPE) {
+    result = new sahagin.FuncArgument();
   } else if (type == sahagin.SubFunctionInvoke.TYPE) {
     result = new sahagin.SubFunctionInvoke();
   } else if (type == sahagin.SubMethodInvoke.TYPE) {
@@ -72,7 +74,7 @@ sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
     result = new sahagin.UnknownCode();
   } else {
     throw new Error(sahagin.CommonUtils.strFormat(
-        sahagin.YamlUtils.MSG_INVALID_TYPE, type));
+        sahagin.Code.MSG_INVALID_TYPE, type));
   }
   result.fromYamlObject(yamlObject);
   return result;
