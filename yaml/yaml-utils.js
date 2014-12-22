@@ -127,7 +127,7 @@ sahagin.YamlUtils.getIntValue = function(yamlObject, key, allowsEmpty) {
 };
 
 /**
- * returns empty map if the value the specified key is null.
+ * returns null if the value the specified key is null.
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
  * @param {boolean} allowsEmpty default false
@@ -161,7 +161,7 @@ sahagin.YamlUtils.getStrListValue = function(yamlObject, key, allowsEmpty) {
 };
 
 /**
- * returns empty map if the value the specified key is null.
+ * returns empty list if the value the specified key is null.
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
  * @param {boolean} allowsEmpty default false
