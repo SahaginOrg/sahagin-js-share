@@ -26,9 +26,9 @@ sahagin.TestFunction = function() {
 
   /**
    * @private
-   * @type {boolean}
+   * @type {string}
    */
-  this.stepInCapture = false;
+  this.captureStyle = sahagin.CaptureStyle.THIS_LINE;
 
   /**
    * @private
@@ -111,17 +111,17 @@ sahagin.TestFunction.prototype.setTestDoc = function(testDoc) {
 };
 
 /**
- * @returns {boolean}
+ * @returns {string}
  */
-sahagin.TestFunction.prototype.isStepInCapture = function() {
-  return this.stepInCapture;
+sahagin.TestFunction.prototype.getCaptureStyle = function() {
+  return this.captureStyle;
 };
 
 /**
- * @param {boolean} stepInCapture
+ * @param {string} captureStyle
  */
-sahagin.TestFunction.prototype.setStepInCapture = function(stepInCapture) {
-  this.stepInCapture = stepInCapture;
+sahagin.TestFunction.prototype.setCaptureStyle = function(captureStyle) {
+  this.captureStyle = captureStyle;
 };
 
 /**
@@ -168,7 +168,7 @@ sahagin.TestFunction.prototype.toYamlObject = function() {
   result['key'] = this.key;
   result['name'] = this.qualifiedName;
   result['testDoc'] = this.testDoc;
-  result['stepInCapture'] = this.stepInCapture;
+  result['capture'] = this.captureStyle;
   result['argVariables'] = this.argVariables;
   result['codeBody'] = sahagin.YamlUtils.toYamlObjectList(this.codeBody);
   return result;
@@ -182,7 +182,11 @@ sahagin.TestFunction.prototype.fromYamlObject = function(yamlObject) {
   this.key = sahagin.YamlUtils.getStrValue(yamlObject, 'key');
   this.qualifiedName = sahagin.YamlUtils.getStrValue(yamlObject, 'name');
   this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc');
-  this.stepInCapture = sahagin.YamlUtils.getBooleanValue(yamlObject, 'stepInCapture');
+  // capture is not mandatory
+  this.capture = sahagin.YamlUtils.getStrValue(yamlObject, 'stepInCapture', true);
+  if (this.capture == null) {
+    this.capture = sahagin.CaptureStyle.THIS_LINE;
+  }
   this.argVariables = sahagin.YamlUtils.getStrListValue(yamlObject, 'argVariables');
   var codeBodyYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'codeBody');
   this.codeBody = new Array();
