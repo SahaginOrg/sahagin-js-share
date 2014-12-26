@@ -129,7 +129,7 @@ sahagin.SrcTree.prototype.toYamlObject = function() {
   result['rootFuncTable'] = rootFuncTableYamlObj;
   result['subClassTable'] = subClassTableYamlObj;
   result['subFuncTable'] = subFuncTableYamlObj;
-  result['sahaginVersion'] = "0.2.3"; // TODO hard coded..
+  result['sahaginVersion'] = sahagin.CommonUtils.sahaginVersion();
 
   return result;
 };

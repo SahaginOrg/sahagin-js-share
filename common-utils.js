@@ -55,6 +55,13 @@ sahagin.base = function(me, opt_methodName, var_args) {
 };
 
 /**
+ * @returns {string}
+ */
+sahagin.CommonUtils.sahaginVersion = function() {
+   return "0.2.3";
+};
+
+/**
  * @param {string} format
  * @param {...*} args
  * @returns {string}
