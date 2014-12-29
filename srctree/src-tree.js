@@ -47,6 +47,13 @@ sahagin.SrcTree.MSG_FUNCTION_NOT_FOUND = 'function not found; key: {0}';
 sahagin.SrcTree.MSG_NOT_METHOD = 'function "{0}" is not a method';
 
 /**
+ * @private
+ * @type {string}
+ */
+sahagin.SrcTree.MSG_SRC_TREE_FORMAT_MISMATCH
+= 'expected formatVersion is "{0}", but actual is "{1}"';
+
+/**
  * @returns {sahagin.TestClassTable}
  */
 sahagin.SrcTree.prototype.getRootClassTable = function() {
@@ -163,6 +170,16 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
     this.subFuncTable = new sahagin.TestFuncTable();
     this.subFuncTable.fromYamlObject(subFuncTableYamlObj);
   }
+
+  var formatVersion = sahagin.YamlUtils.getStrValue(yamlObject, 'formatVersion');
+  // "*" means arbitrary version (this is only for testing sahagin itself)
+  if ((formatVersion != '*')
+      && (formatVersion != sahagin.CommonUtils.formatVersion())) {
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.SrcTree.MSG_SRC_TREE_FORMAT_MISMATCH,
+        sahagin.CommonUtils.formatVersion(), formatVersion));
+  }
+
 };
 
 /**
