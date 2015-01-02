@@ -7,3 +7,10 @@ sahagin.CaptureStyle = {
 
   STEP_IN_ONLY: "stepInOnly"
 };
+
+/**
+ * @returns {string}
+ */
+sahagin.CaptureStyle.getDefault = function() {
+  return sahagin.CaptureStyle.THIS_LINE;
+};

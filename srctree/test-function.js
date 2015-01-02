@@ -28,7 +28,7 @@ sahagin.TestFunction = function() {
    * @private
    * @type {string}
    */
-  this.captureStyle = sahagin.CaptureStyle.THIS_LINE;
+  this.captureStyle = sahagin.CaptureStyle.getDefault();
 
   /**
    * @private
@@ -185,7 +185,7 @@ sahagin.TestFunction.prototype.fromYamlObject = function(yamlObject) {
   // capture is not mandatory
   this.capture = sahagin.YamlUtils.getStrValue(yamlObject, 'stepInCapture', true);
   if (this.capture == null) {
-    this.capture = sahagin.CaptureStyle.THIS_LINE;
+    this.capture = sahagin.CaptureStyle.getDefault();
   }
   this.argVariables = sahagin.YamlUtils.getStrListValue(yamlObject, 'argVariables');
   var codeBodyYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'codeBody');
