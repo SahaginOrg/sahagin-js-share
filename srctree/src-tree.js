@@ -139,6 +139,15 @@ sahagin.SrcTree.prototype.toYamlObject = function() {
  * @param {Object.<string, *>} yamlObject
  */
 sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
+  var formatVersion = sahagin.YamlUtils.getStrValue(yamlObject, 'formatVersion');
+  // "*" means arbitrary version (this is only for testing sahagin itself)
+  if ((formatVersion != '*')
+      && (formatVersion != sahagin.CommonUtils.formatVersion())) {
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.SrcTree.MSG_SRC_TREE_FORMAT_MISMATCH,
+        sahagin.CommonUtils.formatVersion(), formatVersion));
+  }
+
   this.rootClassTable = null;
   this.rootMethodTable = null;
   this.subClassTable = null;
@@ -164,16 +173,6 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
     this.subMethodTable = new sahagin.TestMethodTable();
     this.subMethodTable.fromYamlObject(subMethodTableYamlObj);
   }
-
-  var formatVersion = sahagin.YamlUtils.getStrValue(yamlObject, 'formatVersion');
-  // "*" means arbitrary version (this is only for testing sahagin itself)
-  if ((formatVersion != '*')
-      && (formatVersion != sahagin.CommonUtils.formatVersion())) {
-    throw new Error(sahagin.CommonUtils.strFormat(
-        sahagin.SrcTree.MSG_SRC_TREE_FORMAT_MISMATCH,
-        sahagin.CommonUtils.formatVersion(), formatVersion));
-  }
-
 };
 
 /**
