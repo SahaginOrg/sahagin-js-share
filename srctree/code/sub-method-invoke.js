@@ -6,11 +6,28 @@ sahagin.SubMethodInvoke = function() {
 
   /**
    * @private
+   * @type {string}
+   */
+  this.subMethodKey = null;
+
+  /**
+   * @private
+   * @type {sahagin.TestMethod}
+   */
+  this.subMethod = null;
+
+  /**
+   * @type {Array.<sahagin.Code>}
+   */
+  this.args = new Array();
+
+  /**
+   * @private
    * @type {sahagin.Code}
    */
   this.thisInstance = null;
 };
-sahagin.inherits(sahagin.SubMethodInvoke, sahagin.SubFunctionInvoke);
+sahagin.inherits(sahagin.SubMethodInvoke, sahagin.Code);
 
 /**
  * @type {string}
@@ -21,53 +38,43 @@ sahagin.SubMethodInvoke.TYPE = "method";
  * @returns {string}
  */
 sahagin.SubMethodInvoke.prototype.getSubMethodKey = function() {
-  return this.getSubFunctionKey();
+  return this.subMethodKey;
 };
 
 /**
  * @param {string} subMethodKey
  */
 sahagin.SubMethodInvoke.prototype.setSubMethodKey = function(subMethodKey) {
-  this.setSubFunctionKey(subMethodKey);
+  this.subMethodKey = subMethodKey;
 };
 
 /**
  * @returns {sahagin.TestMethod}
  */
 sahagin.SubMethodInvoke.prototype.getSubMethod = function() {
-  return this.getSubFunction();
-};
-
-/**
- * @param {sahagin.TestFunction} subFunction
- */
-sahagin.SubMethodInvoke.prototype.setSubFunction = function(subFunction) {
-  if (!(subFunction instanceof sahagin.TestMethod)) {
-    throw new Error('not testMethod: ' + subFunction);
-  }
-  sahagin.base(this, 'setSubFunction', subFunction);
+  return this.subMethod;
 };
 
 /**
  * @param {sahagin.TestMethod} subMethod
  */
 sahagin.SubMethodInvoke.prototype.setSubMethod = function(subMethod) {
-  this.setSubFunction(subMethod);
+  this.subMethod = subMethod;
 };
 
 /**
- * @returns {string}
+ * @returns {Array.<sahagin.Code>}
  */
-sahagin.SubMethodInvoke.prototype.getType = function() {
-  return sahagin.SubMethodInvoke.TYPE;
-};
+sahagin.SubMethodInvoke.prototype.getArgs = function() {
+  return this.args;
+}
 
 /**
- * @returns {string}
+ * @param {sahagin.Code} arg
  */
-sahagin.SubMethodInvoke.prototype.getFunctionKeyName = function() {
-  return "methodKey";
-};
+sahagin.SubMethodInvoke.prototype.addArg = function(arg) {
+  this.args.push(arg);
+}
 
 /**
  * @returns {sahagin.Code}
@@ -84,10 +91,19 @@ sahagin.SubMethodInvoke.prototype.setThisInstance = function(thisInstance) {
 };
 
 /**
+ * @returns {string}
+ */
+sahagin.SubMethodInvoke.prototype.getType = function() {
+  return sahagin.SubMethodInvoke.TYPE;
+};
+
+/**
  * @returns {Object.<String, *>}
  */
 sahagin.SubMethodInvoke.prototype.toYamlObject = function() {
   var result = sahagin.base(this, 'toYamlObject');
+  result['methodKey'] = this.subMethodKey;
+  result['args'] = sahagin.YamlUtils.toYamlObjectList(this.args);
   if (this.thisInstance != null) {
     result['thisInstance'] = this.thisInstance.toYamlObject();
   }
@@ -99,6 +115,14 @@ sahagin.SubMethodInvoke.prototype.toYamlObject = function() {
  */
 sahagin.SubMethodInvoke.prototype.fromYamlObject = function(yamlObject) {
   sahagin.base(this, 'fromYamlObject', yamlObject);
+  this.subMethodKey = sahagin.YamlUtils.getStrValue(yamlObject, 'methodKey');
+  this.subMethod = null;
+  var argsYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'args');
+  this.args = new Array();
+  for (var i = 0; i < argsYamlObj.length; i++) {
+    var code = sahagin.Code.newInstanceFromYamlObject(argsYamlObj[i]);
+    this.args.push(code);
+  }
   var thisInstanceYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'thisInstance', true);
   if (thisInstanceYamlObj == null) {
     this.thisInstance = null;

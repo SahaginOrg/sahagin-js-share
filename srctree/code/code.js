@@ -64,10 +64,8 @@ sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
   var result;
   if (type == sahagin.StringCode.TYPE) {
     result = new sahagin.StringCode();
-  } else if (type == sahagin.FuncArgument.TYPE) {
-    result = new sahagin.FuncArgument();
-  } else if (type == sahagin.SubFunctionInvoke.TYPE) {
-    result = new sahagin.SubFunctionInvoke();
+  } else if (type == sahagin.MethodArgument.TYPE) {
+    result = new sahagin.MethodArgument();
   } else if (type == sahagin.SubMethodInvoke.TYPE) {
     result = new sahagin.SubMethodInvoke();
   } else if (type == sahagin.UnknownCode.TYPE) {

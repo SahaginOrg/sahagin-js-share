@@ -58,7 +58,7 @@ sahagin.base = function(me, opt_methodName, var_args) {
  * @returns {string}
  */
 sahagin.CommonUtils.formatVersion = function() {
-   return "0.2.3";
+   return "0.4";
 };
 
 /**

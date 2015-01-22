@@ -10,12 +10,6 @@ sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER
 = 'TestDoc of "{0}" contains invalid keyword "{1}"';
 
 /**
- * @type {string}
- */
-sahagin.TestDocResolver.MSG_THIS_FOR_FUNCTION
-= 'Can not use "this" keyword for function';
-
-/**
  * @private
  * @returns {RegExp}
  */
@@ -24,22 +18,22 @@ sahagin.TestDocResolver.generatePlaceHolderRegExp = function() {
 };
 
 /**
- * Returns invalid placeholder keyword in the specified TestFunction if exists.
+ * Returns invalid placeholder keyword in the specified TestMethod if exists.
  * Returns null if invalid keyword is not found.
- * @param {sahagin.TestFunction} func
+ * @param {sahagin.TestMethod} method
  * @returns {string}
  */
-sahagin.TestDocResolver.searchInvalidPlaceholder = function(func) {
-  if (func == null || func == undefined) {
-    throw new Error(func);
+sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
+  if (method == null || method == undefined) {
+    throw new Error(method);
   }
-  if (func.getTestDoc() == null) {
+  if (method.getTestDoc() == null) {
     return null; // no TestDoc
   }
 
   // replace all placeholders by RegExp
   var matched;
-  var testDoc = func.getTestDoc();
+  var testDoc = method.getTestDoc();
   var regexp = sahagin.TestDocResolver.generatePlaceHolderRegExp();
   while ((matched = regexp.exec(testDoc)) != null) {
     var variable = matched[0];
@@ -49,7 +43,7 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(func) {
       // not index pattern
       if (matched == "this") {
         continue;
-      } else if (func.getArgVariables().indexOf(variable) == -1) {
+      } else if (method.getArgVariables().indexOf(variable) == -1) {
         return variable;
       }
     } else {
@@ -63,28 +57,28 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(func) {
  * Returns original source code if TestDoc is not found
  * @private
  * @param {sahagin.Code} code
- * @param {Array.<string>} placeholderResolvedParentFuncArgTestDocs
+ * @param {Array.<string>} placeholderResolvedParentMethodArgTestDocs
  * @returns {string}
  */
-sahagin.TestDocResolver.funcTestDocSub = function(
-    code, placeholderResolvedParentFuncArgTestDocs) {
+sahagin.TestDocResolver.methodTestDocSub = function(
+    code, placeholderResolvedParentMethodArgTestDocs) {
   if (code instanceof sahagin.StringCode) {
     return code.getValue();
-  } else if (code instanceof sahagin.FuncArgument) {
-    var funcArg = code;
-    return placeholderResolvedParentFuncArgTestDocs[funcArg.getArgIndex()];
-  } else if (code instanceof sahagin.SubFunctionInvoke) {
-    var funcInvoke = code;
-    var func = funcInvoke.getSubFunction();
-    if (func.getTestDoc() == null) {
-      return funcInvoke.getOriginal();
+  } else if (code instanceof sahagin.MethodArgument) {
+    var methodArg = code;
+    return placeholderResolvedParentMethodArgTestDocs[methodArg.getArgIndex()];
+  } else if (code instanceof sahagin.MethodInvoke) {
+    var methodInvoke = code;
+    var method = methodInvoke.getSubMethod();
+    if (method.getTestDoc() == null) {
+      return methodInvoke.getOriginal();
     }
 
     // replace all placeholders by RegExp
     var matched;
     var buf = '';
     var prevEnd = 0;
-    var testDoc = func.getTestDoc();
+    var testDoc = method.getTestDoc();
     var regexp = sahagin.TestDocResolver.generatePlaceHolderRegExp();
     while ((matched = regexp.exec(testDoc)) !== null) {
       var variable = matched[0];
@@ -99,10 +93,6 @@ sahagin.TestDocResolver.funcTestDocSub = function(
 
       var variableCode;
       if (!isIndexPattern && variable == "this") {
-        if (!(funcInvoke instanceof sahagin.SubMethodInvoke)) {
-          throw new Error(sahagin.TestDocResolver.MSG_THIS_FOR_FUNCTION);
-        }
-        var methodInvoke = funcInvoke;
         variableCode = methodInvoke.getThisInstance();
         if (variableCode == null) {
           // When called inside the class on which this method is defined,
@@ -112,18 +102,18 @@ sahagin.TestDocResolver.funcTestDocSub = function(
         }
       } else {
         if (!isIndexPattern) {
-          varIndex = func.getArgVariables().indexOf(variable);
+          varIndex = method.getArgVariables().indexOf(variable);
         }
-        if (varIndex < 0 || varIndex >= funcInvoke.getArgs().length) {
+        if (varIndex < 0 || varIndex >= methodInvoke.getArgs().length) {
           throw new Error(sahagin.CommonUtils.strFormat(
               sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER,
-              func.getQualifiedName(), variable));
+              method.getQualifiedName(), variable));
         }
-        variableCode = funcInvoke.getArgs()[varIndex];
+        variableCode = methodInvoke.getArgs()[varIndex];
       }
       buf = buf + testDoc.substring(prevEnd, matchStart)
-      + sahagin.TestDocResolver.funcTestDocSub(
-          variableCode, placeholderResolvedParentFuncArgTestDocs);
+      + sahagin.TestDocResolver.MethodTestDocSub(
+          variableCode, placeholderResolvedParentMethodArgTestDocs);
       prevEnd = matchEnd;
     }
     buf = buf + testDoc.substring(prevEnd, testDoc.length);
@@ -135,20 +125,20 @@ sahagin.TestDocResolver.funcTestDocSub = function(
 
 /**
  * @param {sahagin.Code} code
- * @param {Array.<string>} placeholderResolvedParentFuncArgTestDocs
+ * @param {Array.<string>} placeholderResolvedParentMethodArgTestDocs
  * @returns {Array.<string>}
  */
-sahagin.TestDocResolver.placeholderResolvedFuncArgTestDocs = function(
-    code, placeholderResolvedParentFuncArgTestDocs) {
-  if (!(code instanceof sahagin.SubFunctionInvoke)) {
+sahagin.TestDocResolver.placeholderResolvedMethodArgTestDocs = function(
+    code, placeholderResolvedParentMethodArgTestDocs) {
+  if (!(code instanceof sahagin.SubMethodInvoke)) {
     return new Array();
   }
-  var funcInvoke = code;
+  var methodInvoke = code;
   var result = new Array();
-  for (var i = 0; i < funcInvoke.getArgs().length; i++) {
-    var code = funcInvoke.getArgs()[i];
-    var argStr = sahagin.TestDocResolver.funcTestDocSub(
-        code, placeholderResolvedParentFuncArgTestDocs);
+  for (var i = 0; i < methodInvoke.getArgs().length; i++) {
+    var code = methodInvoke.getArgs()[i];
+    var argStr = sahagin.TestDocResolver.methodTestDocSub(
+        code, placeholderResolvedParentMethodArgTestDocs);
     result.push(argStr);
   }
   return result;
@@ -156,16 +146,16 @@ sahagin.TestDocResolver.placeholderResolvedFuncArgTestDocs = function(
 
 /**
  * @param {sahagin.Code} code
- * @param {Array.<string>} placeholderResolvedParentFuncArgTestDocs
+ * @param {Array.<string>} placeholderResolvedParentMethodArgTestDocs
  * @returns {string}
  */
-sahagin.TestDocResolver.placeholderResolvedFuncTestDoc = function(
-    code, placeholderResolvedParentFuncArgTestDocs) {
+sahagin.TestDocResolver.placeholderResolvedMethodTestDoc = function(
+    code, placeholderResolvedParentMethodArgTestDocs) {
   if (code instanceof sahagin.UnknownCode) {
     return null; // TestDoc for UnknownCode is null
   } else {
-    return sahagin.TestDocResolver.funcTestDocSub(
-        code, placeholderResolvedParentFuncArgTestDocs);
+    return sahagin.TestDocResolver.methodTestDocSub(
+        code, placeholderResolvedParentMethodArgTestDocs);
   }
 };
 

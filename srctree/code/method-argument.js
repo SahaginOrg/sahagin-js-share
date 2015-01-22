@@ -1,7 +1,7 @@
 /**
  * @class
  */
-sahagin.FuncArgument = function() {
+sahagin.MethodArgument = function() {
   sahagin.base(this);
 
   /**
@@ -10,38 +10,38 @@ sahagin.FuncArgument = function() {
    */
   this.argIndex = -1;
 };
-sahagin.inherits(sahagin.FuncArgument, sahagin.Code);
+sahagin.inherits(sahagin.MethodArgument, sahagin.Code);
 
 /**
  * @type {string}
  */
-sahagin.FuncArgument.TYPE = "arg";
+sahagin.MethodArgument.TYPE = "arg";
 
 /**
  * @returns {string}
  */
-sahagin.FuncArgument.prototype.getType = function() {
-  return sahagin.FuncArgument.TYPE;
+sahagin.MethodArgument.prototype.getType = function() {
+  return sahagin.MethodArgument.TYPE;
 };
 
 /**
  * @returns {number}
  */
-sahagin.FuncArgument.prototype.getArgIndex = function() {
+sahagin.MethodArgument.prototype.getArgIndex = function() {
   return this.argIndex;
 };
 
 /**
  * @param {number} argIndex
  */
-sahagin.FuncArgument.prototype.setArgIndex = function(argIndex) {
+sahagin.MethodArgument.prototype.setArgIndex = function(argIndex) {
     this.argIndex = argIndex;
 };
 
 /**
  * @returns {Object.<String, *>}
  */
-sahagin.FuncArgument.prototype.toYamlObject = function() {
+sahagin.MethodArgument.prototype.toYamlObject = function() {
   var result = sahagin.base(this, 'toYamlObject');
   result['argIndex'] = this.argIndex;
   return result;
@@ -50,7 +50,7 @@ sahagin.FuncArgument.prototype.toYamlObject = function() {
 /**
  * @param {Object.<string, *>} yamlObject
  */
-sahagin.FuncArgument.prototype.fromYamlObject = function(yamlObject) {
+sahagin.MethodArgument.prototype.fromYamlObject = function(yamlObject) {
   sahagin.base(this, 'fromYamlObject', yamlObject);
   this.argIndex = sahagin.YamlUtils.getStrValue(yamlObject, 'argIndex');
 };
