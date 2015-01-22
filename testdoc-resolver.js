@@ -67,7 +67,7 @@ sahagin.TestDocResolver.methodTestDocSub = function(
   } else if (code instanceof sahagin.MethodArgument) {
     var methodArg = code;
     return placeholderResolvedParentMethodArgTestDocs[methodArg.getArgIndex()];
-  } else if (code instanceof sahagin.MethodInvoke) {
+  } else if (code instanceof sahagin.SubMethodInvoke) {
     var methodInvoke = code;
     var method = methodInvoke.getSubMethod();
     if (method.getTestDoc() == null) {
@@ -112,7 +112,7 @@ sahagin.TestDocResolver.methodTestDocSub = function(
         variableCode = methodInvoke.getArgs()[varIndex];
       }
       buf = buf + testDoc.substring(prevEnd, matchStart)
-      + sahagin.TestDocResolver.MethodTestDocSub(
+      + sahagin.TestDocResolver.methodTestDocSub(
           variableCode, placeholderResolvedParentMethodArgTestDocs);
       prevEnd = matchEnd;
     }

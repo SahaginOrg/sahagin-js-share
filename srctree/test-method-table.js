@@ -75,7 +75,8 @@ sahagin.TestMethodTable.prototype.fromYamlObject = function(yamlObject) {
   var testMethodsYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'methods');
   this.testMethods = new Array();
   for (var i = 0; i < testMethodsYamlObj.length; i++) {
-    var testMethod = sahagin.TestMethod.newInstanceFromYamlObject(testMethodsYamlObj[i]);
+    var testMethod = new sahagin.TestMethod();
+    testMethod.fromYamlObject(testMethodsYamlObj[i]);
     this.testMethods.push(testMethod);
   }
 };
