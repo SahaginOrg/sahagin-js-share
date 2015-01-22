@@ -23,12 +23,12 @@ sahagin.TestMethod = function() {
   this.key = null;
 
   /**
-   * function qualified name is not necessarily unique
+   * function simple name is not necessarily unique
    * (because of overloaded methods)
    * @private
    * @type {string}
    */
-  this.qualifiedName = null;
+  this.simpleName = null;
 
   /**
    * @private
@@ -101,28 +101,25 @@ sahagin.TestMethod.prototype.setKey = function(key) {
  * @returns {string}
  */
 sahagin.TestMethod.prototype.getSimpleName = function() {
-  if (this.qualifiedName == null || this.qualifiedName == undefined) {
-    return null;
-  }
-  var lastIndex = this.qualifiedName.lastIndexOf('.'); // TODO name separator is always dot ??
-  if (lastIndex == -1) {
-    return this.qualifiedName;
-  }
-  return this.qualifiedName.substr(lastIndex + 1);
+  return this.simpleName;
+};
+
+/**
+ * @param {string} simpleName
+ */
+sahagin.TestMethod.prototype.setSimpleName = function(simpleName) {
+  this.simpleName = simpleName;
 };
 
 /**
  * @returns {string}
  */
 sahagin.TestMethod.prototype.getQualifiedName = function() {
-  return this.qualifiedName;
-};
-
-/**
- * @param {string} qualifiedName
- */
-sahagin.TestMethod.prototype.setQualifiedName = function(qualifiedName) {
-  this.qualifiedName = qualifiedName;
+  if (this.testClass == null || this.simpleName == null) {
+    return simpleName;
+  } else {
+    return this.testClass.getQualifiedName() + "." + this.simpleName;
+  }
 };
 
 /**
@@ -188,7 +185,7 @@ sahagin.TestMethod.prototype.toYamlObject = function() {
   var result = new Object();
   result['classKey'] = this.testClassKey;
   result['key'] = this.key;
-  result['name'] = this.qualifiedName;
+  result['name'] = this.simpleName;
   result['testDoc'] = this.testDoc;
   result['capture'] = this.captureStyle;
   result['argVariables'] = this.argVariables;
@@ -203,7 +200,7 @@ sahagin.TestMethod.prototype.fromYamlObject = function(yamlObject) {
   this.testClass = null;
   this.testClassKey = sahagin.YamlUtils.getStrValue(yamlObject, 'classKey');
   this.key = sahagin.YamlUtils.getStrValue(yamlObject, 'key');
-  this.qualifiedName = sahagin.YamlUtils.getStrValue(yamlObject, 'name');
+  this.simpleName = sahagin.YamlUtils.getStrValue(yamlObject, 'name');
   this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc');
   // capture is not mandatory
   this.capture = sahagin.YamlUtils.getStrValue(yamlObject, 'stepInCapture', true);

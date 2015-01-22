@@ -152,7 +152,7 @@ sahagin.TestClass.prototype.toYamlObject = function() {
   var result = new Object();
   result['type'] = this.getType();
   result['key'] = this.key;
-  result['name'] = this.qualifiedName;
+  result['qname'] = this.qualifiedName;
   result['testDoc'] = this.testDoc;
   result['methodKeys'] = this.testMethodKeys;
   return result;
@@ -164,7 +164,7 @@ sahagin.TestClass.prototype.toYamlObject = function() {
 sahagin.TestClass.prototype.fromYamlObject = function(yamlObject) {
   sahagin.YamlUtils.strValueEqualsCheck(yamlObject, 'type', this.getType());
   this.key = sahagin.YamlUtils.getStrValue(yamlObject, 'key');
-  this.qualifiedName = sahagin.YamlUtils.getStrValue(yamlObject, 'name');
+  this.qualifiedName = sahagin.YamlUtils.getStrValue(yamlObject, 'qname');
   this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc');
   this.testMethodKeys = sahagin.YamlUtils.getStrListValue(yamlObject, 'methodKeys');
   this.testMethods.length = 0;

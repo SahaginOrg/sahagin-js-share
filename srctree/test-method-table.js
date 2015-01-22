@@ -42,22 +42,30 @@ sahagin.TestMethodTable.prototype.getByKey = function(key) {
 };
 
 /**
- * @param {string} qualifiedName
+ * @param {string} classQualifiedName
+ * @param {string} methodSimpleName
  * @return {Array.<sahagin.TestMethod>}
  */
-sahagin.TestMethodTable.prototype.getByQualifiedName = function(qualifiedName) {
-  if (qualifiedName == null || key == undefined) {
-    throw new Error(qualifiedName);
+sahagin.TestMethodTable.prototype.getByName = function(
+    classQualifiedName, methodSimpleName) {
+  if (classQualifiedName == null || classQualifiedName == undefined) {
+    throw new Error(classQualifiedName);
+  }
+  if (methodSimpleName == null || methodSimpleName == undefined) {
+    throw new Error(methodSimpleName);
   }
   var result = new Array();
   for (var i = 0; i < this.testMethods.length; i++) {
     var testMethod = this.testMethods[i];
-    if (qualifiedName == testMethod.getQualifiedName()) {
+    if ((classQualifiedName == testMethod.getTestClass().getQualifiedName()) &&
+        (methodSimpleName == testMethod.getSimpleName())) {
       result.push(testMethod);
     }
   }
   return result;
 };
+
+// TODO define sort method as well as Java implementation
 
 /**
  * @returns {Object.<string, *>}
