@@ -185,7 +185,7 @@ sahagin.YamlUtils.getYamlObjectListValue = function(yamlObject, key, allowsEmpty
   if (typeof allowsEmpty === 'undefined') {
     allowsEmpty = false;
   }
-  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key);
+  var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
   if (obj === null) {
     if (!allowsEmpty) {
       throw new Error(sahagin.YamlUtils.MSG_LIST_MUST_NOT_BE_NULL);

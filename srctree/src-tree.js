@@ -151,7 +151,7 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
         sahagin.CommonUtils.formatVersion(), formatVersion));
   }
 
-  this.rootMethodTable = new sahagin.TestClassTable();
+  this.rootMethodTable = new sahagin.TestMethodTable();
   var rootMethodTableYamlObj
   = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'rootMethodTable', true);
   if (rootMethodTableYamlObj != null) {
