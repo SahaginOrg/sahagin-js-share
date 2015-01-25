@@ -7,25 +7,25 @@ sahagin.SrcTree = function() {
    * @private
    * @type {sahagin.TestClassTable}
    */
-  this.rootClassTable = null;
+  this.rootClassTable = new sahagin.TestClassTable();
 
   /**
    * @private
    * @type {sahagin.TestMethodTable}
    */
-  this.rootMethodTable = null;
+  this.rootMethodTable = new sahagin.TestMethodTable();
 
   /**
    * @private
    * @type {sahagin.TestClassTable}
    */
-  this.subClassTable = null;
+  this.subClassTable = new sahagin.TestClassTable();
 
   /**
    * @private
    * @type {sahagin.TestMethodTable}
    */
-  this.subMethodTable = null;
+  this.subMethodTable = new sahagin.TestMethodTable();
 };
 
 /**
@@ -58,14 +58,10 @@ sahagin.SrcTree.prototype.getRootClassTable = function() {
  * @param {sahagin.TestClassTable} rootClassTable
  */
 sahagin.SrcTree.prototype.setRootClassTable = function(rootClassTable) {
+  if (rootClassTable == null) {
+    throw new Error("null argument");
+  }
   this.rootClassTable = rootClassTable;
-};
-
-/**
- * @param {sahagin.TestMethodTable} rootMethodTable
- */
-sahagin.SrcTree.prototype.setRootMethodTable = function(rootMethodTable) {
-  this.rootMethodTable = rootMethodTable;
 };
 
 /**
@@ -74,6 +70,17 @@ sahagin.SrcTree.prototype.setRootMethodTable = function(rootMethodTable) {
 sahagin.SrcTree.prototype.getRootMethodTable = function() {
   return this.rootMethodTable;
 };
+
+/**
+ * @param {sahagin.TestMethodTable} rootMethodTable
+ */
+sahagin.SrcTree.prototype.setRootMethodTable = function(rootMethodTable) {
+  if (rootMethodTable == null) {
+    throw new Error("null argument");
+  }
+  this.rootMethodTable = rootMethodTable;
+};
+
 
 /**
  * @returns {sahagin.TestClassTable}
@@ -86,14 +93,10 @@ sahagin.SrcTree.prototype.getSubClassTable = function() {
  * @param {sahagin.TestClassTable} subClassTable
  */
 sahagin.SrcTree.prototype.setSubClassTable = function(subClassTable) {
+  if (subClassTable == null) {
+    throw new Error("null argument");
+  }
   this.subClassTable = subClassTable;
-};
-
-/**
- * @param {sahagin.TestMethodTable} subMethodTable
- */
-sahagin.SrcTree.prototype.setSubMethodTable = function(subMethodTable) {
-  this.subMethodTable = subMethodTable;
 };
 
 /**
@@ -104,34 +107,34 @@ sahagin.SrcTree.prototype.getSubMethodTable = function() {
 };
 
 /**
+ * @param {sahagin.TestMethodTable} subMethodTable
+ */
+sahagin.SrcTree.prototype.setSubMethodTable = function(subMethodTable) {
+  if (subMethodTable == null) {
+    throw new Error("null argument");
+  }
+  this.subMethodTable = subMethodTable;
+};
+
+/**
  * @returns {Object.<string, *>}
  */
 sahagin.SrcTree.prototype.toYamlObject = function() {
   var result = new Object();
-
-  var rootClassTableYamlObj = null;
-  if (this.rootClassTable != null) {
-    rootClassTableYamlObj = this.rootClassTable.toYamlObject();
-  }
-  var rootMethodTableYamlObj = null;
-  if (this.rootMethodTable != null) {
-    rootMethodTableYamlObj = this.rootMethodTable.toYamlObject();
-  }
-  var subClassTableYamlObj = null;
-  if (this.subClassTable != null) {
-    subClassTableYamlObj = this.subClassTable.toYamlObject();
-  }
-  var subMethodTableYamlObj = null;
-  if (this.subMethodTable != null) {
-    subMethodTableYamlObj = this.subMethodTable.toYamlObject();
-  }
-
-  result['rootClassTable'] = rootClassTableYamlObj;
-  result['rootMethodTable'] = rootMethodTableYamlObj;
-  result['subClassTable'] = subClassTableYamlObj;
-  result['subMethodTable'] = subMethodTableYamlObj;
   result['formatVersion'] = sahagin.CommonUtils.formatVersion();
 
+  if (!this.rootClassTable.isEmpty()) {
+    result['rootClassTable'] = this.rootClassTable.toYamlObject();
+  }
+  if (!this.rootMethodTable.isEmpty()) {
+    result['rootMethodTable'] = this.rootMethodTable.toYamlObject();
+  }
+  if (!this.subClassTable.isEmpty()) {
+    result['subClassTable'] = this.subClassTable.toYamlObject();
+  }
+  if (!this.subMethodTable.isEmpty()) {
+    result['subMethodTable'] = this.subMethodTable.toYamlObject();
+  }
   return result;
 };
 
@@ -148,30 +151,32 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
         sahagin.CommonUtils.formatVersion(), formatVersion));
   }
 
-  this.rootClassTable = null;
-  this.rootMethodTable = null;
-  this.subClassTable = null;
-  this.subMethodTable = null;
-
-  var rootClassTableYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'rootClassTable');
-  if (rootClassTableYamlObj != null) {
-    this.rootClassTable = new sahagin.TestClassTable();
-    this.rootClassTable.fromYamlObject(rootClassTableYamlObj);
-  }
-  var rootMethodTableYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'rootMethodTable');
+  this.rootMethodTable = new sahagin.TestClassTable();
+  var rootMethodTableYamlObj
+  = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'rootMethodTable', true);
   if (rootMethodTableYamlObj != null) {
-    this.rootMethodTable = new sahagin.TestMethodTable();
     this.rootMethodTable.fromYamlObject(rootMethodTableYamlObj);
   }
-  var subClassTableYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'subClassTable');
-  if (subClassTableYamlObj != null) {
-    this.subClassTable = new sahagin.TestClassTable();
-    this.subClassTable.fromYamlObject(subClassTableYamlObj);
-  }
-  var subMethodTableYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'subMethodTable');
+
+  this.subMethodTable = new sahagin.TestMethodTable();
+  var subMethodTableYamlObj
+  = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'subMethodTable', true);
   if (subMethodTableYamlObj != null) {
-    this.subMethodTable = new sahagin.TestMethodTable();
     this.subMethodTable.fromYamlObject(subMethodTableYamlObj);
+  }
+
+  this.rootClassTable = new sahagin.TestClassTable();
+  var rootClassTableYamlObj
+  = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'rootClassTable', true);
+  if (rootClassTableYamlObj != null) {
+    this.rootClassTable.fromYamlObject(rootClassTableYamlObj);
+  }
+
+  this.subClassTable = new sahagin.TestClassTable();
+  var subClassTableYamlObj
+  = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'subClassTable', true);
+  if (subClassTableYamlObj != null) {
+    this.subClassTable.fromYamlObject(subClassTableYamlObj);
   }
 };
 
@@ -180,17 +185,13 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
  * @return {sahagin.TestClass}
  */
 sahagin.SrcTree.prototype.getTestClassByKey = function(testClassKey) {
-  if (this.subClassTable != null) {
-    var subClass = this.subClassTable.getByKey(testClassKey);
-    if (subClass != null) {
-      return subClass;
-    }
+  var subClass = this.subClassTable.getByKey(testClassKey);
+  if (subClass != null) {
+    return subClass;
   }
-  if (this.rootClassTable != null) {
-    var rootClass = this.rootClassTable.getByKey(testClassKey);
-    if (rootClass != null) {
-      return rootClass;
-    }
+  var rootClass = this.rootClassTable.getByKey(testClassKey);
+  if (rootClass != null) {
+    return rootClass;
   }
   throw new Error(sahagin.CommonUtils.strFormat(
       sahagin.SrcTree.MSG_CLASS_NOT_FOUND, testClassKey));
@@ -201,17 +202,13 @@ sahagin.SrcTree.prototype.getTestClassByKey = function(testClassKey) {
  * @return {sahagin.TestMethod}
  */
 sahagin.SrcTree.prototype.getTestMethodByKey = function(testMethodKey) {
-  if (this.subMethodTable != null) {
-    var subMethod = this.subMethodTable.getByKey(testMethodKey);
-    if (subMethod != null) {
-      return subMethod;
-    }
+  var subMethod = this.subMethodTable.getByKey(testMethodKey);
+  if (subMethod != null) {
+    return subMethod;
   }
-  if (this.rootMethodTable != null) {
-    var rootMethod = this.rootMethodTable.getByKey(testMethodKey);
-    if (rootMethod != null) {
-      return rootMethod;
-    }
+  var rootMethod = this.rootMethodTable.getByKey(testMethodKey);
+  if (rootMethod != null) {
+    return rootMethod;
   }
   throw new Error(sahagin.CommonUtils.strFormat(
       sahagin.SrcTree.MSG_METHOD_NOT_FOUND, testMethodKey));
@@ -259,32 +256,24 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(code) {
  * assume all keys have been set.
  */
 sahagin.SrcTree.prototype.resolveKeyReference = function() {
-  if (this.rootClassTable != null) {
-    for (var i = 0; i < this.rootClassTable.getTestClasses().length; i++) {
-      this.resolveTestMethod(this.rootClassTable.getTestClasses()[i]);
+  for (var i = 0; i < this.rootClassTable.getTestClasses().length; i++) {
+    this.resolveTestMethod(this.rootClassTable.getTestClasses()[i]);
+  }
+  for (var i = 0; i < this.subClassTable.getTestClasses().length; i++) {
+    this.resolveTestMethod(this.subClassTable.getTestClasses()[i]);
+  }
+  for (var i = 0; i < this.rootMethodTable.getTestMethods().length; i++) {
+    var testMethod = this.rootMethodTable.getTestMethods()[i];
+    this.resolveTestClass(testMethod);
+    for (var j = 0; j < testMethod.getCodeBody().length; j++) {
+      this.resolveTestMethod(testMethod.getCodeBody()[j].getCode());
     }
   }
-  if (this.subClassTable != null) {
-    for (var i = 0; i < this.subClassTable.getTestClasses().length; i++) {
-      this.resolveTestMethod(this.subClassTable.getTestClasses()[i]);
-    }
-  }
-  if (this.rootMethodTable != null) {
-    for (var i = 0; i < this.rootMethodTable.getTestMethods().length; i++) {
-      var testMethod = this.rootMethodTable.getTestMethods()[i];
-      this.resolveTestClass(testMethod);
-      for (var j = 0; j < testMethod.getCodeBody().length; j++) {
-        this.resolveTestMethod(testMethod.getCodeBody()[j].getCode());
-      }
-    }
-  }
-  if (this.subMethodTable != null) {
-    for (var i = 0; i < this.subMethodTable.getTestMethods().length; i++) {
-      var testMethod = this.subMethodTable.getTestMethods()[i];
-      this.resolveTestClass(testMethod);
-      for (var j = 0; j < testMethod.getCodeBody().length; j++) {
-        this.resolveTestMethod(testMethod.getCodeBody()[j].getCode());
-      }
+  for (var i = 0; i < this.subMethodTable.getTestMethods().length; i++) {
+    var testMethod = this.subMethodTable.getTestMethods()[i];
+    this.resolveTestClass(testMethod);
+    for (var j = 0; j < testMethod.getCodeBody().length; j++) {
+      this.resolveTestMethod(testMethod.getCodeBody()[j].getCode());
     }
   }
 };

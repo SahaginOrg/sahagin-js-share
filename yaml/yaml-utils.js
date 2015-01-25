@@ -22,6 +22,11 @@ sahagin.YamlUtils.MSG_VALUE_NOT_INT = 'can\'t convert value to int; key: {0}; va
 sahagin.YamlUtils.MSG_NOT_EQUALS_TO_EXPECTED = '"{0}" is not equals to "{1}"';
 
 /**
+ * @private
+ */
+sahagin.YamlUtils.MSG_LIST_MUST_NOT_BE_NULL = 'list must not be null';
+
+/**
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
  * @param {boolean} allowsEmpty default false
@@ -95,9 +100,15 @@ sahagin.YamlUtils.getStrValue = function(yamlObject, key, allowsEmpty) {
  * @param {Object.<string, *>} yamlObject
  * @param {string} key
  * @param {string} expected
+ * @param {string} defaultValue optional
  */
-sahagin.YamlUtils.strValueEqualsCheck = function(yamlObject, key, expected) {
-  var value = sahagin.YamlUtils.getStrValue(yamlObject, key);
+sahagin.YamlUtils.strValueEqualsCheck = function(
+    yamlObject, key, expected, defaultValue) {
+  var defaultAssigned = (typeof defaultValue !== 'undefined');
+  var value = sahagin.YamlUtils.getStrValue(yamlObject, key, defaultAssigned);
+  if (value === null && defaultAssigned) {
+    value = defaultValue;
+  }
   if (value != expected) {
     throw new Error(sahagin.CommonUtils.strFormat(
         sahagin.YamlUtils.MSG_NOT_EQUALS_TO_EXPECTED, key, expected));
@@ -154,6 +165,9 @@ sahagin.YamlUtils.getStrListValue = function(yamlObject, key, allowsEmpty) {
   }
   var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key, allowsEmpty);
   if (obj === null) {
+    if (!allowsEmpty) {
+      throw new Error(sahagin.YamlUtils.MSG_LIST_MUST_NOT_BE_NULL);
+    }
     return new Array();
   }
   // assume the returned object is string Array
@@ -173,6 +187,9 @@ sahagin.YamlUtils.getYamlObjectListValue = function(yamlObject, key, allowsEmpty
   }
   var obj = sahagin.YamlUtils.getObjectValue(yamlObject, key);
   if (obj === null) {
+    if (!allowsEmpty) {
+      throw new Error(sahagin.YamlUtils.MSG_LIST_MUST_NOT_BE_NULL);
+    }
     return new Array();
   }
   // assume the returned object is YAML object list

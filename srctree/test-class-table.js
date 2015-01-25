@@ -25,6 +25,13 @@ sahagin.TestClassTable.prototype.addTestClass = function(testClass) {
 };
 
 /**
+ * @returns {boolean}
+ */
+sahagin.TestClassTable.prototype.isEmpty = function() {
+  this.testClasses.length == 0;
+};
+
+/**
  * returns null if not found
  * @param {string} key
  * @returns {sahagin.TestClass}
@@ -47,7 +54,9 @@ sahagin.TestClassTable.prototype.getByKey = function(key) {
  */
 sahagin.TestClassTable.prototype.toYamlObject = function() {
   var result = new Object();
-  result['classes'] = sahagin.YamlUtils.toYamlObjectList(this.testClasses);
+  if (!this.isEmpty()) {
+    result['classes'] = sahagin.YamlUtils.toYamlObjectList(this.testClasses);
+  }
   return result;
 };
 
@@ -55,7 +64,7 @@ sahagin.TestClassTable.prototype.toYamlObject = function() {
  * @param {Object.<string, *>} yamlObject
  */
 sahagin.TestClassTable.prototype.fromYamlObject = function(yamlObject) {
-  var testClassesYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'classes');
+  var testClassesYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'classes', true);
   this.testClasses = new Array();
   for (var i = 0; i < testClassesYamlObj.length; i++) {
     var testClass = sahagin.TestClass.newInstanceFromYamlObject(testClassesYamlObj[i]);

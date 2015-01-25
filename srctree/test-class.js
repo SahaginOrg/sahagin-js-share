@@ -48,6 +48,11 @@ sahagin.TestClass.MSG_INVALID_TYPE = 'invalid type: {0}';
 sahagin.TestClass.TYPE = 'class';
 
 /**
+ * @type {string}
+ */
+sahagin.TestClass.DEFAULT_TYPE = sahagin.TestClass.TYPE;
+
+/**
  * @returns {string}
  */
 sahagin.TestClass.prototype.getKey = function() {
@@ -150,11 +155,17 @@ sahagin.TestClass.prototype.getType = function() {
  */
 sahagin.TestClass.prototype.toYamlObject = function() {
   var result = new Object();
-  result['type'] = this.getType();
   result['key'] = this.key;
   result['qname'] = this.qualifiedName;
-  result['testDoc'] = this.testDoc;
-  result['methodKeys'] = this.testMethodKeys;
+  if (this.getType() != sahagin.TestClass.DEFAULT_TYPE) {
+    result['type'] = this.getType();
+  }
+  if (this.testDoc !== null && this.testDoc !== undefined) {
+    result['testDoc'] = this.testDoc;
+  }
+  if (this.testMethodKeys.length != 0) {
+    result['methodKeys'] = this.testMethodKeys;
+  }
   return result;
 };
 
@@ -162,11 +173,12 @@ sahagin.TestClass.prototype.toYamlObject = function() {
  * @param {Object.<string, *>} yamlObject
  */
 sahagin.TestClass.prototype.fromYamlObject = function(yamlObject) {
-  sahagin.YamlUtils.strValueEqualsCheck(yamlObject, 'type', this.getType());
+  sahagin.YamlUtils.strValueEqualsCheck(
+      yamlObject, 'type', this.getType(), sahagin.TestClass.DEFAULT_TYPE);
   this.key = sahagin.YamlUtils.getStrValue(yamlObject, 'key');
   this.qualifiedName = sahagin.YamlUtils.getStrValue(yamlObject, 'qname');
-  this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc');
-  this.testMethodKeys = sahagin.YamlUtils.getStrListValue(yamlObject, 'methodKeys');
+  this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc', true);
+  this.testMethodKeys = sahagin.YamlUtils.getStrListValue(yamlObject, 'methodKeys', true);
   this.testMethods.length = 0;
 };
 
@@ -174,7 +186,10 @@ sahagin.TestClass.prototype.fromYamlObject = function(yamlObject) {
  * @param {Object.<string, *>} yamlObject
  */
 sahagin.TestClass.newInstanceFromYamlObject = function(yamlObject) {
-  var type = sahagin.YamlUtils.getStrValue(yamlObject, 'type');
+  var type = sahagin.YamlUtils.getStrValue(yamlObject, 'type', true);
+  if (type === null) {
+    type = sahagin.TestClass.DEFAULT_TYPE;
+  }
   var result;
   if (type == sahagin.TestClass.TYPE) {
     result = new sahagin.TestClass();

@@ -147,6 +147,10 @@ sahagin.TestMethod.prototype.getCaptureStyle = function() {
  * @param {string} captureStyle
  */
 sahagin.TestMethod.prototype.setCaptureStyle = function(captureStyle) {
+  if (captureStyle == sahagin.CaptureStyle.NONE
+      || captureStyle == sahagin.CaptureStyle.STEP_IN_ONLY) {
+    throw new Error("not supported yet: " + captureStyle);
+  }
   this.captureStyle = captureStyle;
 };
 
@@ -186,10 +190,18 @@ sahagin.TestMethod.prototype.toYamlObject = function() {
   result['classKey'] = this.testClassKey;
   result['key'] = this.key;
   result['name'] = this.simpleName;
-  result['testDoc'] = this.testDoc;
-  result['capture'] = this.captureStyle;
-  result['argVariables'] = this.argVariables;
-  result['codeBody'] = sahagin.YamlUtils.toYamlObjectList(this.codeBody);
+  if (this.testDoc !== null && this.testDoc !== undefined) {
+    result['testDoc'] = this.testDoc;
+  }
+  if (this.captureStyle != sahagin.CaptureStyle.getDefault()) {
+    result['capture'] = this.captureStyle;
+  }
+  if (this.argVariables.length != 0) {
+    result['argVariables'] = this.argVariables;
+  }
+  if (this.codeBody.length != 0) {
+    result['codeBody'] = sahagin.YamlUtils.toYamlObjectList(this.codeBody);
+  }
   return result;
 };
 
@@ -201,14 +213,14 @@ sahagin.TestMethod.prototype.fromYamlObject = function(yamlObject) {
   this.testClassKey = sahagin.YamlUtils.getStrValue(yamlObject, 'classKey');
   this.key = sahagin.YamlUtils.getStrValue(yamlObject, 'key');
   this.simpleName = sahagin.YamlUtils.getStrValue(yamlObject, 'name');
-  this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc');
+  this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc', true);
   // capture is not mandatory
   this.capture = sahagin.YamlUtils.getStrValue(yamlObject, 'stepInCapture', true);
   if (this.capture == null) {
     this.capture = sahagin.CaptureStyle.getDefault();
   }
-  this.argVariables = sahagin.YamlUtils.getStrListValue(yamlObject, 'argVariables');
-  var codeBodyYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'codeBody');
+  this.argVariables = sahagin.YamlUtils.getStrListValue(yamlObject, 'argVariables', true);
+  var codeBodyYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'codeBody', true);
   this.codeBody = new Array();
   for (var i = 0; i < codeBodyYamlObj.length; i++) {
     var codeLine = new sahagin.CodeLine();

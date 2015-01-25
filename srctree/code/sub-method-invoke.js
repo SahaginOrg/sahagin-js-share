@@ -103,7 +103,9 @@ sahagin.SubMethodInvoke.prototype.getType = function() {
 sahagin.SubMethodInvoke.prototype.toYamlObject = function() {
   var result = sahagin.base(this, 'toYamlObject');
   result['methodKey'] = this.subMethodKey;
-  result['args'] = sahagin.YamlUtils.toYamlObjectList(this.args);
+  if (this.args.length != 0) {
+    result['args'] = sahagin.YamlUtils.toYamlObjectList(this.args);
+  }
   if (this.thisInstance != null) {
     result['thisInstance'] = this.thisInstance.toYamlObject();
   }
@@ -117,7 +119,7 @@ sahagin.SubMethodInvoke.prototype.fromYamlObject = function(yamlObject) {
   sahagin.base(this, 'fromYamlObject', yamlObject);
   this.subMethodKey = sahagin.YamlUtils.getStrValue(yamlObject, 'methodKey');
   this.subMethod = null;
-  var argsYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'args');
+  var argsYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'args', true);
   this.args = new Array();
   for (var i = 0; i < argsYamlObj.length; i++) {
     var code = sahagin.Code.newInstanceFromYamlObject(argsYamlObj[i]);

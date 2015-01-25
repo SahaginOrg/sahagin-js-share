@@ -21,7 +21,14 @@ sahagin.TestMethodTable.prototype.getTestMethods = function() {
  */
 sahagin.TestMethodTable.prototype.addTestMethod = function(testMethod) {
   this.testMethods.push(testMethod);
-}
+};
+
+/**
+ * @returns {boolean}
+ */
+sahagin.TestMethodTable.prototype.isEmpty = function() {
+  this.testMethods.length == 0;
+};
 
 /**
  * returns null if not found
@@ -72,7 +79,9 @@ sahagin.TestMethodTable.prototype.getByName = function(
  */
 sahagin.TestMethodTable.prototype.toYamlObject = function() {
   var result = new Object();
-  result['methods'] = sahagin.YamlUtils.toYamlObjectList(this.testMethods);
+  if (!this.isEmpty()) {
+    result['methods'] = sahagin.YamlUtils.toYamlObjectList(this.testMethods);
+  }
   return result;
 };
 
@@ -80,7 +89,7 @@ sahagin.TestMethodTable.prototype.toYamlObject = function() {
  * @param {Object.<string, *>} yamlObject
  */
 sahagin.TestMethodTable.prototype.fromYamlObject = function(yamlObject) {
-  var testMethodsYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'methods');
+  var testMethodsYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'methods', true);
   this.testMethods = new Array();
   for (var i = 0; i < testMethodsYamlObj.length; i++) {
     var testMethod = new sahagin.TestMethod();
