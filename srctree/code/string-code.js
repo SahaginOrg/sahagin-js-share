@@ -21,7 +21,7 @@ sahagin.StringCode.TYPE = "string";
  * @returns {string}
  */
 sahagin.StringCode.prototype.getValue = function() {
-  return this.original;	
+  return this.value;
 };
 
 /**

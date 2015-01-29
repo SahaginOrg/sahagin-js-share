@@ -80,7 +80,7 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
  * @param {string} methodKey
  * @returns {boolean}
  */
-sahagin.TestDocResolver.isAdditionalMethodKey(methodKey) {
+sahagin.TestDocResolver.isAdditionalMethodKey = function(methodKey) {
   return methodKey != null && sahagin.CommonUtils.startsWith(methodKey, "_Additional_");
 };
 
@@ -104,11 +104,11 @@ sahagin.TestDocResolver.methodInvokeNormalVariableCodes = function(methodInvoke,
       variableCode.setOriginal(methodInvoke.getSubMethod().getTestClass().getSimpleName());
       empty = true;
     }
-    return {code: [variableCode], empty: empty};
+    return {codes: [variableCode], empty: empty};
   }
 
   var varIndex = parseInt(variable, 10);
-  if (!isNaN(varIndex)) {
+  if (isNaN(varIndex)) {
     // not index pattern
     varIndex = method.getArgVariables().indexOf(variable);
   }
@@ -132,7 +132,7 @@ sahagin.TestDocResolver.methodInvokeNormalVariableCodes = function(methodInvoke,
       throw new Error(sahagin.CommonUtils.strFormat(
           sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
     }
-    return {code: [methodInvoke.getArgs().get(varIndex)], empty: false};
+    return {codes: [methodInvoke.getArgs()[varIndex]], empty: false};
   }
 
   if (varIndex == method.getVariableLengthArgIndex()) {
@@ -143,9 +143,9 @@ sahagin.TestDocResolver.methodInvokeNormalVariableCodes = function(methodInvoke,
     //   is empty string if no rest arguments exist.
     var variableCodes = new Array();
     for (var i = varIndex; i < methodInvoke.getArgs().length; i++) {
-      variableCodes.push(methodInvoke.getArgs().get(i));
+      variableCodes.push(methodInvoke.getArgs()[i]);
     }
-    return {code: variableCodes, empty: (variableCodes.length == 0)};
+    return {codes: variableCodes, empty: (variableCodes.length == 0)};
   }
 
   if (varIndex > method.getVariableLengthArgIndex()) {
@@ -153,7 +153,7 @@ sahagin.TestDocResolver.methodInvokeNormalVariableCodes = function(methodInvoke,
         sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
   }
 
-  return {code: methodInvoke.getArgs().get(varIndex), empty: false};
+  return {codes: [methodInvoke.getArgs()[varIndex]], empty: false};
 };
 
 /**
@@ -220,7 +220,7 @@ sahagin.TestDocResolver.methodInvokeTestDoc = function(
     var matchEnd = matchStart + variable.length;
     variable = variable.substring(1, variable.length - 1); // trim head and tail braces
 
-    if (variable.startsWith("if:")) {
+    if (sahagin.CommonUtils.startsWith(variable, "if:")) {
       if (insideIf) {
         // nested if is not supported yet
         throw new Error(sahagin.CommonUtils.strFormat(
@@ -247,9 +247,9 @@ sahagin.TestDocResolver.methodInvokeTestDoc = function(
     } else if (skip) {
       // abort matched data
     } else {
-      buf = buf + testDoc.substring(prevEnd, matchStart)
-      + sahagin.TestDocResolver.methodTestDocSub(
-          variableCode, placeholderResolvedParentMethodArgTestDocs);
+      var variableTestDoc = sahagin.TestDocResolver.methodInvokeNormalVariableTestDoc(
+            methodInvoke, variable, placeholderResolvedParentMethodArgTestDocs);
+      buf = buf + testDoc.substring(prevEnd, matchStart) + variableTestDoc;
     }
     prevEnd = matchEnd;
   }
@@ -283,7 +283,7 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     return sahagin.TestDocResolver.methodInvokeTestDoc(
         methodInvoke, placeholderResolvedParentMethodArgTestDocs);
   } else {
-    return code.getOriginal;
+    return code.getOriginal();
   }
 };
 

@@ -227,7 +227,7 @@ sahagin.TestMethod.prototype.toYamlObject = function() {
     result['argVariables'] = this.argVariables;
   }
   if (this.variableLengthArgIndex != -1) {
-      result['varLengthArgIndex'] = this.variableLengthArgIndex;
+    result['varLengthArgIndex'] = this.variableLengthArgIndex;
   }
   if (this.codeBody.length != 0) {
     result['codeBody'] = sahagin.YamlUtils.toYamlObjectList(this.codeBody);
@@ -253,9 +253,9 @@ sahagin.TestMethod.prototype.fromYamlObject = function(yamlObject) {
 
   var variableLengthArgIndexObj = sahagin.YamlUtils.getIntValue(yamlObject, "varLengthArgIndex", true);
   if (variableLengthArgIndexObj === null) {
-    variableLengthArgIndex = -1;
+    this.variableLengthArgIndex = -1;
   } else {
-    variableLengthArgIndex = variableLengthArgIndexObj;
+    this.variableLengthArgIndex = variableLengthArgIndexObj;
   }
   var codeBodyYamlObj = sahagin.YamlUtils.getYamlObjectListValue(yamlObject, 'codeBody', true);
   this.codeBody = new Array();
