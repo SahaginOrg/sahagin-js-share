@@ -17,6 +17,7 @@ sahagin.CodeLine = function() {
   this.endLine = 0;
 
   /**
+   * @private
    * @type {sahagin.Code}
    */
   this.code = null;

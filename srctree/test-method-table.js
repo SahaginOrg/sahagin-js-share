@@ -4,6 +4,7 @@
 sahagin.TestMethodTable = function() {
 
   /**
+   * @private
    * @type {Array.<sahagin.TestMethod>}
    */
   this.testMethods = new Array();

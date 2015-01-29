@@ -17,6 +17,7 @@ sahagin.SubMethodInvoke = function() {
   this.subMethod = null;
 
   /**
+   * @private
    * @type {Array.<sahagin.Code>}
    */
   this.args = new Array();
