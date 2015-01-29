@@ -4,10 +4,25 @@
 sahagin.TestDocResolver = function() {};
 
 /**
+ * @private
  * @type {string}
  */
 sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER
 = 'TestDoc of "{0}" contains invalid keyword "{1}"';
+
+/**
+ * @private
+ * @type {string}
+ */
+sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER_POS
+= 'TestDoc of "{0}" contains invalid position keyword {1}';
+
+/**
+ * @private
+ * @type {string}
+ */
+sahagin.TestDocResolver.MSG_STATEMENT_NOT_CLOSED
+= '{end} keyword not found in TestDoc of "{0}"';
 
 /**
  * @private
@@ -35,6 +50,7 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
   var matched;
   var testDoc = method.getTestDoc();
   var regexp = sahagin.TestDocResolver.generatePlaceHolderRegExp();
+  var conditionalFound = false;
   while ((matched = regexp.exec(testDoc)) != null) {
     var variable = matched[0];
     variable = variable.substring(1, variable.length - 1); // trim head and tail braces
@@ -42,6 +58,11 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
     if (isNaN(varIndex)) {
       // not index pattern
       if (matched == "this") {
+        continue;
+      } else if (sahagin.CommonUtils.startsWith(matched, "if:")) {
+        conditionalFound = true;
+        continue;
+      } else if (conditionalFound && matched == "end") {
         continue;
       } else if (method.getArgVariables().indexOf(variable) == -1) {
         return variable;
@@ -52,6 +73,196 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
   }
   return null;
 };
+
+/**
+ * TODO this method should be removed
+ * @private
+ * @param {string} methodKey
+ * @returns {boolean}
+ */
+sahagin.TestDocResolver.isAdditionalMethodKey(methodKey) {
+  return methodKey != null && sahagin.CommonUtils.startsWith(methodKey, "_Additional_");
+};
+
+/**
+ * @param {sahagin.SubMethodInvoke} methodInvoke
+ * @param {string} variable
+ * @return {Object} object with property "codes" and "empty".
+ * "empty" is whether argument for variable is actually specified.
+ * {this} and variable length argument can be empty
+ */
+sahagin.TestDocResolver.methodInvokeNormalVariableCodes = function(methodInvoke, variable) {
+  var method = methodInvoke.getSubMethod();
+
+  if (variable == "this") {
+    var variableCode = methodInvoke.getThisInstance();
+    var empty = false;
+    if (variableCode == null) {
+      // When called inside the class on which this method is defined,
+      // set the class name for {this} keyword
+      variableCode = new UnknownCode();
+      variableCode.setOriginal(methodInvoke.getSubMethod().getTestClass().getSimpleName());
+      empty = true;
+    }
+    return {code: [variableCode], empty: empty};
+  }
+
+  var varIndex = parseInt(variable, 10);
+  if (!isNaN(varIndex)) {
+    // not index pattern
+    varIndex = method.getArgVariables().indexOf(variable);
+  }
+
+  if (varIndex < 0) {
+    // maybe fails to calculate varIndex from variable
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
+  }
+
+  // TestMethod for AdditionalMethodTestDoc does not have argument information currently.
+  // TODO should have argument information and should not use isAdditionalMethodKey method
+  if (varIndex >= method.getArgVariables().length
+      && !sahagin.TestDocResolver.isAdditionalMethodKey(method.getKey())) {
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
+  }
+
+  if (!method.hasVariableLengthArg()) {
+    if (varIndex >= methodInvoke.getArgs().length) {
+      throw new Error(sahagin.CommonUtils.strFormat(
+          sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
+    }
+    return {code: [methodInvoke.getArgs().get(varIndex)], empty: false};
+  }
+
+  if (varIndex == method.getVariableLengthArgIndex()) {
+    // variable length argument.
+    // - TestDoc for variable length argument
+    //   is the comma connected string of all rest arguments.
+    // - TestDoc for variable length argument
+    //   is empty string if no rest arguments exist.
+    var variableCodes = new Array();
+    for (var i = varIndex; i < methodInvoke.getArgs().length; i++) {
+      variableCodes.push(methodInvoke.getArgs().get(i));
+    }
+    return {code: variableCodes, empty: (variableCodes.length == 0)};
+  }
+
+  if (varIndex > method.getVariableLengthArgIndex()) {
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
+  }
+
+  return {code: methodInvoke.getArgs().get(varIndex), empty: false};
+};
+
+/**
+ * @param {sahagin.SubMethodInvoke} methodInvoke
+ * @param {string} variable
+ * @param {Array.<string>} placeholderResolvedParentMethodArgTestDocs
+ * @returns {string}
+ */
+sahagin.TestDocResolver.methodInvokeNormalVariableTestDoc
+= function(methodInvoke, variable, placeholderResolvedParentMethodArgTestDocs) {
+  var variableCodes
+  = sahagin.TestDocResolver.methodInvokeNormalVariableCodes(methodInvoke, variable).codes;
+  var testDoc = "";
+  for (var i = 0; i < variableCodes.length; i++) {
+    if (i != 0) {
+      testDoc = testDoc + ", ";
+    }
+    testDoc = testDoc + sahagin.TestDocResolver.methodTestDocSub(
+        variableCodes[i], placeholderResolvedParentMethodArgTestDocs);
+  }
+  return testDoc;
+};
+
+/**
+ * @param {sahagin.SubMethodInvoke} methodInvoke
+ * @param {string} condVariable
+ * @param {Array.<string>} placeholderResolvedParentMethodArgTestDocs
+ * @returns {boolean}
+ */
+sahagin.TestDocResolver.validateCondVariable = function(
+    methodInvoke, condVariable, placeholderResolvedParentMethodArgTestDocs) {
+  var splitted = condVariable.split(":");
+  if (splitted.length != 2) {
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER,
+        methodInvoke.getSubMethod().getQualifiedName(), condVariable));
+  }
+  var expressionVariable = splitted[1];
+  // returns true if argument for expressionVariable is not empty
+  return !sahagin.TestDocResolver.methodInvokeNormalVariableCodes(
+      methodInvoke, expressionVariable).empty;
+};
+
+sahagin.TestDocResolver.methodInvokeTestDoc = function(
+    methodInvoke, placeholderResolvedParentMethodArgTestDocs) {
+  var method = methodInvoke.getSubMethod();
+  if (method.getTestDoc() == null) {
+    return methodInvoke.getOriginal();
+  }
+
+  // replace all placeholders by RegExp
+  var matched;
+  var buf = '';
+  var dummyBuf = '';
+  var prevEnd = 0;
+  var testDoc = method.getTestDoc();
+  var regexp = sahagin.TestDocResolver.generatePlaceHolderRegExp();
+  var ifFound = false;
+  var insideIf = false;
+  var skip = false;
+  while ((matched = regexp.exec(testDoc)) !== null) {
+    var variable = matched[0];
+    var matchStart = matched.index;
+    var matchEnd = matchStart + variable.length;
+    variable = variable.substring(1, variable.length - 1); // trim head and tail braces
+
+    if (variable.startsWith("if:")) {
+      if (insideIf) {
+        // nested if is not supported yet
+        throw new Error(sahagin.CommonUtils.strFormat(
+            sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER_POS,
+            method.getQualifiedName(), variable));
+      }
+      buf = buf + testDoc.substring(prevEnd, matchStart);
+      ifFound = true;
+      insideIf = true;
+      skip = !sahagin.TestDocResolver.validateCondVariable(
+          methodInvoke, variable, placeholderResolvedParentMethodArgTestDocs);
+    } else if (variable == "end" && ifFound) {
+      if (!insideIf) {
+        throw new Error(sahagin.CommonUtils.strFormat(
+            sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER_POS,
+            method.getQualifiedName(), variable));
+      }
+      // abort matched data if skip flag is true
+      if (!skip) {
+        buf = buf + testDoc.substring(prevEnd, matchStart);
+      }
+      insideIf = false;
+      skip = false;
+    } else if (skip) {
+      // abort matched data
+    } else {
+      buf = buf + testDoc.substring(prevEnd, matchStart)
+      + sahagin.TestDocResolver.methodTestDocSub(
+          variableCode, placeholderResolvedParentMethodArgTestDocs);
+    }
+    prevEnd = matchEnd;
+  }
+  if (insideIf) {
+    throw new Error(sahagin.CommonUtils.strFormat(
+        sahagin.TestDocResolver.MSG_STATEMENT_NOT_CLOSED,
+        method.getQualifiedName()));
+  }
+  buf = buf + testDoc.substring(prevEnd, testDoc.length);
+  return buf.toString();
+};
+
+
 
 /**
  * Returns original source code if TestDoc is not found
@@ -69,57 +280,10 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     return placeholderResolvedParentMethodArgTestDocs[methodArg.getArgIndex()];
   } else if (code instanceof sahagin.SubMethodInvoke) {
     var methodInvoke = code;
-    var method = methodInvoke.getSubMethod();
-    if (method.getTestDoc() == null) {
-      return methodInvoke.getOriginal();
-    }
-
-    // replace all placeholders by RegExp
-    var matched;
-    var buf = '';
-    var prevEnd = 0;
-    var testDoc = method.getTestDoc();
-    var regexp = sahagin.TestDocResolver.generatePlaceHolderRegExp();
-    while ((matched = regexp.exec(testDoc)) !== null) {
-      var variable = matched[0];
-      var matchStart = matched.index;
-      var matchEnd = matchStart + variable.length;
-      variable = variable.substring(1, variable.length - 1); // trim head and tail braces
-      var isIndexPattern = false;
-      var varIndex = parseInt(variable, 10);
-      if (!isNaN(varIndex)) {
-        isIndexPattern = true;
-      }
-
-      var variableCode;
-      if (!isIndexPattern && variable == "this") {
-        variableCode = methodInvoke.getThisInstance();
-        if (variableCode == null) {
-          // When called inside the class on which this method is defined,
-          // set the class name for {this} keyword
-          variableCode = new sahagin.UnknownCode();
-          variableCode.setOriginal(methodInvoke.getSubMethod().getTestClass().getSimpleName());
-        }
-      } else {
-        if (!isIndexPattern) {
-          varIndex = method.getArgVariables().indexOf(variable);
-        }
-        if (varIndex < 0 || varIndex >= methodInvoke.getArgs().length) {
-          throw new Error(sahagin.CommonUtils.strFormat(
-              sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER,
-              method.getQualifiedName(), variable));
-        }
-        variableCode = methodInvoke.getArgs()[varIndex];
-      }
-      buf = buf + testDoc.substring(prevEnd, matchStart)
-      + sahagin.TestDocResolver.methodTestDocSub(
-          variableCode, placeholderResolvedParentMethodArgTestDocs);
-      prevEnd = matchEnd;
-    }
-    buf = buf + testDoc.substring(prevEnd, testDoc.length);
-    return buf;
+    return sahagin.TestDocResolver.methodInvokeTestDoc(
+        methodInvoke, placeholderResolvedParentMethodArgTestDocs);
   } else {
-    return code.getOriginal();
+    return code.getOriginal;
   }
 };
 

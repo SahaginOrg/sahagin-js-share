@@ -76,3 +76,18 @@ sahagin.CommonUtils.strFormat = function(format, args) {
     return formatArgs[parseInt(number) + 1];
   });
 };
+
+/**
+ * @param {string} str
+ * @param {string} pattern
+ * @returns {boolean} true if str starts with pattern
+ */
+sahagin.CommonUtils.startsWith = function(str, pattern) {
+  if (pattern == null || pattern == "" || pattern == undefined) {
+    throw new Error("invalid pattern: " + pattern);
+  }
+  if (str == null || str == undefined) {
+    return false;
+  }
+  return (str.lastIndexOf(pattern, 0) == 0);
+};
