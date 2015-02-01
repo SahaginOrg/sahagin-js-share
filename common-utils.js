@@ -6,6 +6,13 @@ sahagin = {};
 sahagin.CommonUtils = {};
 
 /**
+ * @returns {string}
+ */
+sahagin.CommonUtils.formatVersion = function() {
+   return "0.5";
+};
+
+/**
  * copied from goog.inherits.
  * see http://docs.closure-library.googlecode.com/git/namespace_goog.html
  */
@@ -52,13 +59,6 @@ sahagin.base = function(me, opt_methodName, var_args) {
         'sahagin.base called from a method of one name ' +
         'to a method of a different name');
   }
-};
-
-/**
- * @returns {string}
- */
-sahagin.CommonUtils.formatVersion = function() {
-   return "0.4";
 };
 
 /**

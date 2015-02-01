@@ -75,16 +75,6 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
 };
 
 /**
- * TODO this method should be removed
- * @private
- * @param {string} methodKey
- * @returns {boolean}
- */
-sahagin.TestDocResolver.isAdditionalMethodKey = function(methodKey) {
-  return methodKey != null && sahagin.CommonUtils.startsWith(methodKey, "_Additional_");
-};
-
-/**
  * @param {sahagin.SubMethodInvoke} methodInvoke
  * @param {string} variable
  * @return {Object} object with property "codes" and "empty".
@@ -119,13 +109,8 @@ sahagin.TestDocResolver.methodInvokeNormalVariableCodes = function(methodInvoke,
         sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
   }
 
-  // TestMethod for AdditionalMethodTestDoc does not have argument information currently.
-  // TODO should have argument information and should not use isAdditionalMethodKey method
-  if (varIndex >= method.getArgVariables().length
-      && !sahagin.TestDocResolver.isAdditionalMethodKey(method.getKey())) {
-    throw new Error(sahagin.CommonUtils.strFormat(
-        sahagin.TestDocResolver.MSG_INVALID_PLACEHOLDER, method.getQualifiedName(), variable));
-  }
+  // TODO maybe should check that varIndex >= method.getArgVariables().length
+  // only when method actually has argument variable information
 
   if (!method.hasVariableLengthArg()) {
     if (varIndex >= methodInvoke.getArgs().length) {
