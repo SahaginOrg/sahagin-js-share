@@ -27,6 +27,12 @@ sahagin.SubMethodInvoke = function() {
    * @type {sahagin.Code}
    */
   this.thisInstance = null;
+
+  /**
+   * @private
+   * @type {boolean}
+   */
+  this.childInvoke = false;
 };
 sahagin.inherits(sahagin.SubMethodInvoke, sahagin.Code);
 
@@ -92,6 +98,20 @@ sahagin.SubMethodInvoke.prototype.setThisInstance = function(thisInstance) {
 };
 
 /**
+ * @returns {boolean}
+ */
+sahagin.SubMethodInvoke.prototype.isChildInvoke = function() {
+  return this.childInvoke;
+};
+
+/**
+ * @param {boolean} childInvoke
+ */
+sahagin.SubMethodInvoke.prototype.setChildInvoke = function(childInvoke) {
+  this.childInvoke = childInvoke;
+};
+
+/**
  * @returns {string}
  */
 sahagin.SubMethodInvoke.prototype.getType = function() {
@@ -109,6 +129,9 @@ sahagin.SubMethodInvoke.prototype.toYamlObject = function() {
   }
   if (this.thisInstance != null) {
     result['thisInstance'] = this.thisInstance.toYamlObject();
+  }
+  if (this.childInvoke) {
+      result["childInvoke"] = this.childInvoke;
   }
   return result;
 };
@@ -131,5 +154,11 @@ sahagin.SubMethodInvoke.prototype.fromYamlObject = function(yamlObject) {
     this.thisInstance = null;
   } else {
     this.thisInstance = sahagin.Code.newInstanceFromYamlObject(thisInstanceYamlObj);
+  }
+  var childInvokeObj = sahagin.YamlUtils.getBooleanValue(yamlObject, 'childInvoke', true);
+  if (childInvokeObj === null) {
+      this.childInvoke = false;
+  } else {
+      this.childInvoke = childInvokeObj;
   }
 };
