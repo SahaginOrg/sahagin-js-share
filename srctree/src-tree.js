@@ -248,6 +248,9 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(code) {
     for (var i = 0; i < invoke.getArgs().length; i++) {
       this.resolveTestMethod(invoke.getArgs()[i]);
     }
+  } else if (code instanceof sahagin.LocalVarAssign) {
+    var assign = code;
+    this.resolveTestMethod(assign.getValue());
   }
 };
 

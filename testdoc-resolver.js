@@ -25,6 +25,20 @@ sahagin.TestDocResolver.MSG_STATEMENT_NOT_CLOSED
 = '{end} keyword not found in TestDoc of "{0}"';
 
 /**
+ * exposed to other class.
+ * TODO this is temporal logic..
+ * @type {string}
+ */
+sahagin.TestDocResolver.LOCAL_VAR = null;
+
+/**
+ * exposed to other class.
+ * TODO this is temporal logic..
+ * @type {string}
+ */
+sahagin.TestDocResolver.LOCAL_VAR_ASSIGN = null;
+
+/**
  * @private
  * @returns {RegExp}
  */
@@ -247,8 +261,6 @@ sahagin.TestDocResolver.methodInvokeTestDoc = function(
   return buf.toString();
 };
 
-
-
 /**
  * Returns original source code if TestDoc is not found
  * @private
@@ -267,6 +279,18 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     var methodInvoke = code;
     return sahagin.TestDocResolver.methodInvokeTestDoc(
         methodInvoke, placeholderResolvedParentMethodArgTestDocs);
+  } else if (code instanceof sahagin.LocalVar) {
+    var localVar = code;
+    // TODO implement locale handling logic.. very poor logic..
+    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.LOCAL_VAR,
+        localVar.getName());
+  } else if (code instanceof sahagin.LocalVarAssign) {
+    var assign = code;
+    var valueTestDoc = sahagin.TestDocResolver.methodTestDocSub(
+        assign.getValue(), placeholderResolvedParentMethodArgTestDocs);
+    // TODO implement locale handling logic.. very poor logic..
+    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.LOCAL_VAR_ASSIGN,
+        assign.getName(), valueTestDoc);
   } else {
     return code.getOriginal();
   }
