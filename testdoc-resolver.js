@@ -29,14 +29,14 @@ sahagin.TestDocResolver.MSG_STATEMENT_NOT_CLOSED
  * TODO this is temporal logic..
  * @type {string}
  */
-sahagin.TestDocResolver.LOCAL_VAR = null;
+sahagin.TestDocResolver.JS_LOCAL_VAR = null;
 
 /**
  * exposed to other class.
  * TODO this is temporal logic..
  * @type {string}
  */
-sahagin.TestDocResolver.LOCAL_VAR_ASSIGN = null;
+sahagin.TestDocResolver.JS_LOCAL_VAR_ASSIGN = null;
 
 /**
  * @private
@@ -282,14 +282,14 @@ sahagin.TestDocResolver.methodTestDocSub = function(
   } else if (code instanceof sahagin.LocalVar) {
     var localVar = code;
     // TODO implement locale handling logic.. very poor logic..
-    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.LOCAL_VAR,
+    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_LOCAL_VAR,
         localVar.getName());
   } else if (code instanceof sahagin.LocalVarAssign) {
     var assign = code;
     var valueTestDoc = sahagin.TestDocResolver.methodTestDocSub(
         assign.getValue(), placeholderResolvedParentMethodArgTestDocs);
     // TODO implement locale handling logic.. very poor logic..
-    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.LOCAL_VAR_ASSIGN,
+    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_LOCAL_VAR_ASSIGN,
         assign.getName(), valueTestDoc);
   } else {
     return code.getOriginal();
