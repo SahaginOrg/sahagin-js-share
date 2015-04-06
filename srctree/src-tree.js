@@ -251,6 +251,11 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(code) {
   } else if (code instanceof sahagin.LocalVarAssign) {
     var assign = code;
     this.resolveTestMethod(assign.getValue());
+  } else if (code instanceof sahagin.TestStep) {
+    var testStep = code;
+    for (var i = 0; i < testStep.getStepBody().length; i++) {
+      this.resolveTestMethod(testStep.getStepBody()[i].getCode());
+    }
   }
 };
 

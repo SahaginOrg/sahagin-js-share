@@ -9,7 +9,7 @@ sahagin.CommonUtils = {};
  * @returns {string}
  */
 sahagin.CommonUtils.formatVersion = function() {
-   return "0.7";
+   return "0.8";
 };
 
 /**
