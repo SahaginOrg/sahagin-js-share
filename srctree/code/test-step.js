@@ -16,7 +16,7 @@ sahagin.TestStepLabel = function() {
    */
   this.text = null;
 };
-sahagin.inherits(sahagin.TestStepLabelLabel, sahagin.Code);
+sahagin.inherits(sahagin.TestStepLabel, sahagin.Code);
 
 /**
  * @type {string}
