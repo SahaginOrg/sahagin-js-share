@@ -284,6 +284,15 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     // TODO implement locale handling logic.. very poor logic..
     return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_LOCAL_VAR,
         localVar.getName());
+  } else if (code instanceof sahagin.Field) {
+    var field = code;
+    var testDoc = field.getField().getTestDoc();
+    if (testDoc == null) {
+        // TODO resolve {this} keyword in the testDoc of the Field
+        return code.getOriginal();
+    } else {
+        return testDoc;
+    }
   } else if (code instanceof sahagin.VarAssign) {
     var assign = code;
     var variableTestDoc = sahagin.TestDocResolver.methodTestDocSub(
@@ -335,54 +344,48 @@ sahagin.TestDocResolver.placeholderResolvedMethodTestDoc = function(
 };
 
 /**
- * returns null if Page not found
- * @private
- * @param {sahagin.SubMethodInvoke} methodInvoke
- * @returns {string}
- */
-sahagin.TestDocResolver.methodInvokePageTestDocNoRecursive = function(methodInvoke) {
-  if (!(methodInvoke.getSubMethod().getTestClass() instanceof sahagin.PageClass)) {
-    return null;
-  }
-  var page = methodInvoke.getSubMethod().getTestClass();
-  return page.getTestDoc();
-};
-
-/**
- * Returns first found page testDoc.
- * returns null if page testDoc not found
- * @private
- * @param {sahagin.SubMethodInvoke} methodInvoke
- * @returns {string}
- */
-sahagin.TestDocResolver.methodInvokePageTestDocRecursive = function(methodInvoke) {
-  var pageTestDoc = sahagin.TestDocResolver.methodInvokePageTestDocNoRecursive(methodInvoke);
-  if (pageTestDoc != null) {
-    return pageTestDoc;
-  }
-  for (var i = 0; i < methodInvoke.getArgs().length; i++) {
-    var code = methodInvoke.getArgs()[i];
-    if (code && code instanceof sahagin.SubMethodInvoke) {
-      var codeLinePageTestDoc
-      = sahagin.TestDocResolver.methodInvokePageTestDocRecursive(code);
-      if (codeLinePageTestDoc != null) {
-        return codeLinePageTestDoc;
-      }
-    }
-  }
-  return null;
-};
-
-/**
  * Returns first found page testDoc.
  * returns null if page testDoc not found
  * @param {sahagin.Code} code
- * @returns {string}
+ * @returns {sahagin.PageClass}
  */
-sahagin.TestDocResolver.pageTestDoc = function(code) {
-  if (!(code instanceof sahagin.SubMethodInvoke)) {
-    return null;
+sahagin.TestDocResolver.codePage = function(code) {
+  if (code instanceof sahagin.SubMethodInvoke) {
+    var invoke = code;
+    var testClass = invoke.getSubMethod().getTestClass();
+    if (testClass instanceof sahagin.PageClass) {
+      return testClass;
+    }
+    var thisPage = sahagin.TestDocResolver.codePage(invoke.getThisInstance());
+    if (thisPage != null) {
+      return thisPage;
+    }
+    for (var i = 0; i < invoke.getArgs().length; i++) {
+      var argPage = sahagin.TestDocResolver.codePage(invoke.getArgs()[i]);
+      if (argPage != null) {
+        return argPage;
+      }
+    }
+  } else if (code instanceof sahagin.Field) {
+    var field = code;
+    var testClass = field.getField().getTestClass();
+    if (testClass instanceof sahagin.PageClass) {
+      return testClass;
+    }
+    var thisPage = sahagin.TestDocResolver.codePage(field.getThisInstance());
+    if (thisPage != null) {
+      return thisPage;
+    }
+  } else if (code instanceof sahagin.VarAssign) {
+    var assign = code;
+    var varPage = sahagin.TestDocResolver.codePage(assign.getVariable());
+    if (varPage != null) {
+      return varPage;
+    }
+    var valuePage = sahagin.TestDocResolver.codePage(assign.getValue());
+    if (valuePage != null) {
+      return valuePage;
+    }
   }
-  var invoke = code;
-  return sahagin.TestDocResolver.methodInvokePageTestDocRecursive(invoke);
+  return null;
 };

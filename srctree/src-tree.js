@@ -276,7 +276,7 @@ sahagin.SrcTree.prototype.resolveTestClass = function(testMethod) {
 /**
  * @param {sahagin.TestClass} testClass
  */
-sahagin.SrcTree.prototype.resolveTestMethodInTestClass = function(testClass) {
+sahagin.SrcTree.prototype.resolveTestMethod = function(testClass) {
   testClass.clearTestMethods();
   for (var i = 0; i < testClass.getTestMethodKeys().length; i++) {
     var testMethod = this.getTestMethodByKey(testClass.getTestMethodKeys()[i]);
@@ -310,7 +310,7 @@ sahagin.SrcTree.prototype.resolveDelegateToTestClass = function(testClass) {
 /**
  * @param {sahagin.Code} code
  */
-sahagin.SrcTree.prototype.resolveTestMethodInCode = function(code) {
+sahagin.SrcTree.prototype.resolveKeyReferenceInCode = function(code) {
   if (code == null || code == undefined) {
     return;
   }
@@ -319,18 +319,23 @@ sahagin.SrcTree.prototype.resolveTestMethodInCode = function(code) {
     var invoke = code;
     var testMethod = this.getTestMethodByKey(invoke.getSubMethodKey());
     invoke.setSubMethod(testMethod);
-    this.resolveTestMethodInCode(invoke.getThisInstance());
+    this.resolveKeyReferenceInCode(invoke.getThisInstance());
     for (var i = 0; i < invoke.getArgs().length; i++) {
-      this.resolveTestMethodInCode(invoke.getArgs()[i]);
+      this.resolveKeyReferenceInCode(invoke.getArgs()[i]);
     }
+  } else if (code instanceof sahagin.Field) {
+    var field = code;
+    var testField = this.getTestFieldByKey(field.getFieldKey());
+    field.setField(testField);
+    this.resolveKeyReferenceInCode(field.getThisInstance());
   } else if (code instanceof sahagin.VarAssign) {
     var assign = code;
-    this.resolveTestMethodInCode(assign.getVariable());
-    this.resolveTestMethodInCode(assign.getValue());
+    this.resolveKeyReferenceInCode(assign.getVariable());
+    this.resolveKeyReferenceInCode(assign.getValue());
   } else if (code instanceof sahagin.TestStep) {
     var testStep = code;
     for (var i = 0; i < testStep.getStepBody().length; i++) {
-      this.resolveTestMethodInCode(testStep.getStepBody()[i].getCode());
+      this.resolveKeyReferenceInCode(testStep.getStepBody()[i].getCode());
     }
   }
 };
@@ -342,13 +347,13 @@ sahagin.SrcTree.prototype.resolveTestMethodInCode = function(code) {
 sahagin.SrcTree.prototype.resolveKeyReference = function() {
   for (var i = 0; i < this.rootClassTable.getTestClasses().length; i++) {
     var testClass = this.rootClassTable.getTestClasses()[i];
-    this.resolveTestMethodInTestClass(testClass);
+    this.resolveTestMethod(testClass);
     this.resolveTestField(testClass);
     this.resolveDelegateToTestClass(testClass);
   }
   for (var i = 0; i < this.subClassTable.getTestClasses().length; i++) {
     var testClass = this.subClassTable.getTestClasses()[i];
-    this.resolveTestMethodInTestClass(testClass);
+    this.resolveTestMethod(testClass);
     this.resolveTestField(testClass);
     this.resolveDelegateToTestClass(testClass);
   }
@@ -356,14 +361,14 @@ sahagin.SrcTree.prototype.resolveKeyReference = function() {
     var testMethod = this.rootMethodTable.getTestMethods()[i];
     this.resolveTestClass(testMethod);
     for (var j = 0; j < testMethod.getCodeBody().length; j++) {
-      this.resolveTestMethodInCode(testMethod.getCodeBody()[j].getCode());
+      this.resolveKeyReferenceInCode(testMethod.getCodeBody()[j].getCode());
     }
   }
   for (var i = 0; i < this.subMethodTable.getTestMethods().length; i++) {
     var testMethod = this.subMethodTable.getTestMethods()[i];
     this.resolveTestClass(testMethod);
     for (var j = 0; j < testMethod.getCodeBody().length; j++) {
-      this.resolveTestMethodInCode(testMethod.getCodeBody()[j].getCode());
+      this.resolveKeyReferenceInCode(testMethod.getCodeBody()[j].getCode());
     }
   }
 };
