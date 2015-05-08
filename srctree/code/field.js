@@ -61,7 +61,7 @@ sahagin.Field.prototype.setField = function(field) {
  * @returns {sahagin.Code}
  */
 sahagin.Field.prototype.getThisInstance = function() {
-  return thisInstance;
+  return this.thisInstance;
 };
 
 /**
