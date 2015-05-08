@@ -63,7 +63,7 @@ sahagin.VarAssign.prototype.setValue = function(value) {
  */
 sahagin.VarAssign.prototype.toYamlObject = function() {
   var result = sahagin.base(this, 'toYamlObject');
-  result['variable'] = sahagin.YamlUtils.toYamlObject(this.variable);
+  result['var'] = sahagin.YamlUtils.toYamlObject(this.variable);
   result['value'] = sahagin.YamlUtils.toYamlObject(this.value);
   return result;
 };
@@ -73,7 +73,7 @@ sahagin.VarAssign.prototype.toYamlObject = function() {
  */
 sahagin.VarAssign.prototype.fromYamlObject = function(yamlObject) {
   sahagin.base(this, 'fromYamlObject', yamlObject);
-  var variableYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'variable');
+  var variableYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'var');
   this.variable = sahagin.Code.newInstanceFromYamlObject(variableYamlObj);
   var valueYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'value');
   this.value = sahagin.Code.newInstanceFromYamlObject(valueYamlObj);

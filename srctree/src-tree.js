@@ -31,7 +31,7 @@ sahagin.SrcTree = function() {
    * @private
    * @type {sahagin.TestFieldTable}
    */
-  this.fieldTable = new sahagin.FieldTable();
+  this.fieldTable = new sahagin.TestFieldTable();
 };
 
 /**
@@ -288,10 +288,10 @@ sahagin.SrcTree.prototype.resolveTestMethodInTestClass = function(testClass) {
  * @param {sahagin.TestClass} testClass
  */
 sahagin.SrcTree.prototype.resolveTestField = function(testClass) {
-  this.testClass.clearTestFields();
-  for (var i = 0; i < this.testClass.getTestFieldKeys().length; i++) {
-    var testField = this.getTestFieldByKey(this.testClass.getTestFieldKeys()[i]);
-    this.testClass.addTestField(testField);
+  testClass.clearTestFields();
+  for (var i = 0; i < testClass.getTestFieldKeys().length; i++) {
+    var testField = this.getTestFieldByKey(testClass.getTestFieldKeys()[i]);
+    testClass.addTestField(testField);
   }
 };
 
@@ -299,11 +299,11 @@ sahagin.SrcTree.prototype.resolveTestField = function(testClass) {
  * @param {sahagin.TestClass} testClass
  */
 sahagin.SrcTree.prototype.resolveDelegateToTestClass = function(testClass) {
-  if (this.testClass.getDelegateToTestClassKey() === null) {
-    this.testClass.setDelegateToTestClass(null);
+  if (testClass.getDelegateToTestClassKey() === null) {
+    testClass.setDelegateToTestClass(null);
   } else {
-    this.testClass.setDelegateToTestClass(
-        this.getTestClassByKey(this.testClass.getDelegateToTestClassKey()));
+    testClass.setDelegateToTestClass(
+        this.getTestClassByKey(testClass.getDelegateToTestClassKey()));
   }
 };
 
