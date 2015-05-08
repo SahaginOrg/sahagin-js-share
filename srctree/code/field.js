@@ -74,7 +74,7 @@ sahagin.Field.prototype.setThisInstance = function(thisInstance) {
 /**
  * @returns {string}
  */
-sahagin.Field.prototype.getType() {
+sahagin.Field.prototype.getType = function() {
   return sahagin.Field.TYPE;
 };
 
