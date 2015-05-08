@@ -26,6 +26,12 @@ sahagin.SrcTree = function() {
    * @type {sahagin.TestMethodTable}
    */
   this.subMethodTable = new sahagin.TestMethodTable();
+
+  /**
+   * @private
+   * @type {sahagin.TestFieldTable}
+   */
+  this.fieldTable = new sahagin.FieldTable();
 };
 
 /**
@@ -39,6 +45,12 @@ sahagin.SrcTree.MSG_CLASS_NOT_FOUND = 'class not found; key: {0}';
  * @type {string}
  */
 sahagin.SrcTree.MSG_METHOD_NOT_FOUND = 'method not found; key: {0}';
+
+/**
+ * @private
+ * @type {string}
+ */
+sahagin.SrcTree.MSG_FIELD_NOT_FOUND = 'field not found; key: {0}';
 
 /**
  * @private
@@ -117,12 +129,32 @@ sahagin.SrcTree.prototype.setSubMethodTable = function(subMethodTable) {
 };
 
 /**
+ * @returns {sahagin.TestFieldTable}
+ */
+sahagin.SrcTree.prototype.getFieldTable = function() {
+  return this.fieldTable;
+};
+
+/**
+ *
+ */
+sahagin.SrcTree.prototype.setFieldTable = function(fieldTable) {
+  if (fieldTable == null) {
+    throw new Error("null argument");
+  }
+  this.fieldTable = fieldTable;
+};
+
+/**
  * @returns {Object.<string, *>}
  */
 sahagin.SrcTree.prototype.toYamlObject = function() {
   var result = new Object();
   result['formatVersion'] = sahagin.CommonUtils.formatVersion();
 
+  if (!this.fieldTable.isEmpty()) {
+    result['fieldTable'] =  this.fieldTable.toYamlObject();
+  }
   if (!this.rootClassTable.isEmpty()) {
     result['rootClassTable'] = this.rootClassTable.toYamlObject();
   }
@@ -149,6 +181,13 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
     throw new Error(sahagin.CommonUtils.strFormat(
         sahagin.SrcTree.MSG_SRC_TREE_FORMAT_MISMATCH,
         sahagin.CommonUtils.formatVersion(), formatVersion));
+  }
+
+  this.fieldTable = new sahagin.TestFieldTable();
+  var fieldTableYamlObj
+  = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'fieldTable', true);
+  if (fieldTableYamlObj != null) {
+    this.fieldTable.fromYamlObject(fieldTableYamlObj);
   }
 
   this.rootMethodTable = new sahagin.TestMethodTable();
@@ -182,7 +221,7 @@ sahagin.SrcTree.prototype.fromYamlObject = function(yamlObject) {
 
 /**
  * @param {string} testClassKey
- * @return {sahagin.TestClass}
+ * @returns {sahagin.TestClass}
  */
 sahagin.SrcTree.prototype.getTestClassByKey = function(testClassKey) {
   var subClass = this.subClassTable.getByKey(testClassKey);
@@ -199,7 +238,7 @@ sahagin.SrcTree.prototype.getTestClassByKey = function(testClassKey) {
 
 /**
  * @param {string} testMethodKey
- * @return {sahagin.TestMethod}
+ * @returns {sahagin.TestMethod}
  */
 sahagin.SrcTree.prototype.getTestMethodByKey = function(testMethodKey) {
   var subMethod = this.subMethodTable.getByKey(testMethodKey);
@@ -215,6 +254,19 @@ sahagin.SrcTree.prototype.getTestMethodByKey = function(testMethodKey) {
 };
 
 /**
+ * @param {string} testFieldKey
+ * @returns {sahagin.TestField}
+ */
+sahagin.SrcTree.prototype.getTestFieldByKey = function(testFieldKey) {
+  var field = this.fieldTable.getByKey(testFieldKey);
+  if (field != null) {
+    return field;
+  }
+  throw new Error(sahagin.CommonUtils.strFormat(
+      sahagin.SrcTree.MSG_FIELD_NOT_FOUND, testFieldKey));
+};
+
+/**
  * @param {sahagin.TestMethod} testMethod
  */
 sahagin.SrcTree.prototype.resolveTestClass = function(testMethod) {
@@ -224,7 +276,7 @@ sahagin.SrcTree.prototype.resolveTestClass = function(testMethod) {
 /**
  * @param {sahagin.TestClass} testClass
  */
-sahagin.SrcTree.prototype.resolveTestMethod = function(testClass) {
+sahagin.SrcTree.prototype.resolveTestMethodInTestClass = function(testClass) {
   testClass.clearTestMethods();
   for (var i = 0; i < testClass.getTestMethodKeys().length; i++) {
     var testMethod = this.getTestMethodByKey(testClass.getTestMethodKeys()[i]);
@@ -233,9 +285,32 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(testClass) {
 };
 
 /**
+ * @param {sahagin.TestClass} testClass
+ */
+sahagin.SrcTree.prototype.resolveTestField = function(testClass) {
+  this.testClass.clearTestFields();
+  for (var i = 0; i < this.testClass.getTestFieldKeys().length; i++) {
+    var testField = this.getTestFieldByKey(this.testClass.getTestFieldKeys()[i]);
+    this.testClass.addTestField(testField);
+  }
+};
+
+/**
+ * @param {sahagin.TestClass} testClass
+ */
+sahagin.SrcTree.prototype.resolveDelegateToTestClass = function(testClass) {
+  if (this.testClass.getDelegateToTestClassKey() === null) {
+    this.testClass.setDelegateToTestClass(null);
+  } else {
+    this.testClass.setDelegateToTestClass(
+        this.getTestClassByKey(this.testClass.getDelegateToTestClassKey()));
+  }
+};
+
+/**
  * @param {sahagin.Code} code
  */
-sahagin.SrcTree.prototype.resolveTestMethod = function(code) {
+sahagin.SrcTree.prototype.resolveTestMethodInCode = function(code) {
   if (code == null || code == undefined) {
     return;
   }
@@ -244,17 +319,18 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(code) {
     var invoke = code;
     var testMethod = this.getTestMethodByKey(invoke.getSubMethodKey());
     invoke.setSubMethod(testMethod);
-    this.resolveTestMethod(invoke.getThisInstance());
+    this.resolveTestMethodInCode(invoke.getThisInstance());
     for (var i = 0; i < invoke.getArgs().length; i++) {
-      this.resolveTestMethod(invoke.getArgs()[i]);
+      this.resolveTestMethodInCode(invoke.getArgs()[i]);
     }
-  } else if (code instanceof sahagin.LocalVarAssign) {
+  } else if (code instanceof sahagin.VarAssign) {
     var assign = code;
-    this.resolveTestMethod(assign.getValue());
+    this.resolveTestMethodInCode(assign.getVariable());
+    this.resolveTestMethodInCode(assign.getValue());
   } else if (code instanceof sahagin.TestStep) {
     var testStep = code;
     for (var i = 0; i < testStep.getStepBody().length; i++) {
-      this.resolveTestMethod(testStep.getStepBody()[i].getCode());
+      this.resolveTestMethodInCode(testStep.getStepBody()[i].getCode());
     }
   }
 };
@@ -265,23 +341,29 @@ sahagin.SrcTree.prototype.resolveTestMethod = function(code) {
  */
 sahagin.SrcTree.prototype.resolveKeyReference = function() {
   for (var i = 0; i < this.rootClassTable.getTestClasses().length; i++) {
-    this.resolveTestMethod(this.rootClassTable.getTestClasses()[i]);
+    var testClass = this.rootClassTable.getTestClasses()[i];
+    this.resolveTestMethodInTestClass(testClass);
+    this.resolveTestField(testClass);
+    this.resolveDelegateToTestClass(testClass);
   }
   for (var i = 0; i < this.subClassTable.getTestClasses().length; i++) {
-    this.resolveTestMethod(this.subClassTable.getTestClasses()[i]);
+    var testClass = this.subClassTable.getTestClasses()[i];
+    this.resolveTestMethodInTestClass(testClass);
+    this.resolveTestField(testClass);
+    this.resolveDelegateToTestClass(testClass);
   }
   for (var i = 0; i < this.rootMethodTable.getTestMethods().length; i++) {
     var testMethod = this.rootMethodTable.getTestMethods()[i];
     this.resolveTestClass(testMethod);
     for (var j = 0; j < testMethod.getCodeBody().length; j++) {
-      this.resolveTestMethod(testMethod.getCodeBody()[j].getCode());
+      this.resolveTestMethodInCode(testMethod.getCodeBody()[j].getCode());
     }
   }
   for (var i = 0; i < this.subMethodTable.getTestMethods().length; i++) {
     var testMethod = this.subMethodTable.getTestMethods()[i];
     this.resolveTestClass(testMethod);
     for (var j = 0; j < testMethod.getCodeBody().length; j++) {
-      this.resolveTestMethod(testMethod.getCodeBody()[j].getCode());
+      this.resolveTestMethodInCode(testMethod.getCodeBody()[j].getCode());
     }
   }
 };

@@ -25,6 +25,18 @@ sahagin.TestClass = function() {
 
   /**
    * @private
+   * @type {string}
+   */
+  this.delegateToTestClassKey = null;
+
+  /**
+   * @private
+   * @type {sahagin.TestClass}
+   */
+  this.delegateToTestClass = null;
+
+  /**
+   * @private
    * @type {Array.<string>}
    */
   this.testMethodKeys = new Array();
@@ -34,6 +46,18 @@ sahagin.TestClass = function() {
    * @type {Array.<sahagin.TestMethod>}
    */
   this.testMethods = new Array();
+
+  /**
+   * @private
+   * @type {Array.<string>}
+   */
+  this.testFieldKeys = new Array();
+
+  /**
+   * @private
+   * @type {Array.<sahagin.TestField>}
+   */
+  this.testFields = new Array();
 };
 
 /**
@@ -109,6 +133,34 @@ sahagin.TestClass.prototype.setTestDoc = function(testDoc) {
 };
 
 /**
+ * @returns {string}
+ */
+sahagin.TestClass.prototype.getDelegateToTestClassKey = function() {
+  return this.delegateToTestClassKey;
+};
+
+/**
+ * @param {string} delegateToTestClassKey
+ */
+sahagin.TestClass.prototype.setDelegateToTestClassKey = function(delegateToTestClassKey) {
+  this.delegateToTestClassKey = delegateToTestClassKey;
+};
+
+/**
+ * @returns {sahagin.TestClass}
+ */
+sahagin.TestClass.prototype.getDelegateToTestClass = function() {
+  return this.delegateToTestClass;
+};
+
+/**
+ * @param {sahagin.TestClass} delegateToTestClass
+ */
+sahagin.TestClass.prototype.setDelegateToTestClass = function(delegateToTestClass) {
+  this.delegateToTestClass = delegateToTestClass;
+};
+
+/**
  * @returns {Array.<string>}
  */
 sahagin.TestClass.prototype.getTestMethodKeys = function() {
@@ -144,6 +196,41 @@ sahagin.TestClass.prototype.clearTestMethods = function() {
 };
 
 /**
+ * @returns {Array.<string>}
+ */
+sahagin.TestClass.prototype.getTestFieldKeys = function() {
+  return this.testFieldKeys;
+};
+
+/**
+ * @param {string} testFieldKey
+ */
+sahagin.TestClass.prototype.addTestFieldKey = function(testFieldKey) {
+  this.testFieldKeys.push(testFieldKey);
+};
+
+/**
+ * @returns {Array.<sahagin.TestField>}
+ */
+sahagin.TestClass.prototype.getTestFields = function() {
+  return this.testFields;
+};
+
+/**
+ * @param {sahagin.TestField} testField
+ */
+sahagin.TestClass.prototype.addTestField = function(testField) {
+  this.testFields.push(testField);
+};
+
+/**
+ *
+ */
+sahagin.TestClass.prototype.clearTestFields = function() {
+  this.testFields.length = 0;
+};
+
+/**
  * @returns {string}
  */
 sahagin.TestClass.prototype.getType = function() {
@@ -160,11 +247,17 @@ sahagin.TestClass.prototype.toYamlObject = function() {
   if (this.getType() != sahagin.TestClass.DEFAULT_TYPE) {
     result['type'] = this.getType();
   }
+  if (this.delegateToTestClassKey !== null) {
+    result['delegateToClassKey'] = this.delegateToTestClassKey;
+  }
   if (this.testDoc !== null && this.testDoc !== undefined) {
     result['testDoc'] = this.testDoc;
   }
   if (this.testMethodKeys.length != 0) {
     result['methodKeys'] = this.testMethodKeys;
+  }
+  if (this.testFieldKeys.length != 0) {
+    result['fieldKeys'] = this.testFieldKeys;
   }
   return result;
 };
@@ -178,8 +271,12 @@ sahagin.TestClass.prototype.fromYamlObject = function(yamlObject) {
   this.key = sahagin.YamlUtils.getStrValue(yamlObject, 'key');
   this.qualifiedName = sahagin.YamlUtils.getStrValue(yamlObject, 'qname');
   this.testDoc = sahagin.YamlUtils.getStrValue(yamlObject, 'testDoc', true);
+  this.delegateToTestClassKey = sahagin.YamlUtils.getStrValue(yamlObject, 'delegateToClassKey', true);
+  this.delegateToTestClass = null;
   this.testMethodKeys = sahagin.YamlUtils.getStrListValue(yamlObject, 'methodKeys', true);
   this.testMethods.length = 0;
+  this.testFieldKeys = sahagin.YamlUtils.getStrListValue(yamlObject, 'fieldKeys', true);
+  this.testFields.length = 0;
 };
 
 /**

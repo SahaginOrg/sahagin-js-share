@@ -224,13 +224,25 @@ sahagin.YamlUtils.getYamlObjectListValue = function(yamlObject, key, allowsEmpty
 };
 
 /**
+ * @param {Object} src YAML convertible object
+ * @returns {Object.<string, *>} YAML object
+ */
+sahagin.YamlUtils.toYamlObject = function(src) {
+  if (src == null) {
+      return null;
+  } else {
+      return src.toYamlObject();
+  }
+};
+
+/**
  * @param {Array.<Object>} srcList list of YAML convertible object
  * @returns {Array.<Object.<string, *>>} array of YAML object
  */
 sahagin.YamlUtils.toYamlObjectList = function(srcList) {
   var result = new Array();
   for (var i = 0; i < srcList.length; i++) {
-    var yamlObj = srcList[i].toYamlObject();
+    var yamlObj = sahagin.YamlUtils.toYamlObject(srcList[i]);
     result.push(yamlObj);
   }
   return result;

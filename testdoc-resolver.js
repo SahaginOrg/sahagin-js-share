@@ -36,7 +36,7 @@ sahagin.TestDocResolver.JS_LOCAL_VAR = null;
  * TODO this is temporal logic..
  * @type {string}
  */
-sahagin.TestDocResolver.JS_LOCAL_VAR_ASSIGN = null;
+sahagin.TestDocResolver.JS_VAR_ASSIGN = null;
 
 /**
  * @private
@@ -91,7 +91,7 @@ sahagin.TestDocResolver.searchInvalidPlaceholder = function(method) {
 /**
  * @param {sahagin.SubMethodInvoke} methodInvoke
  * @param {string} variable
- * @return {Object} object with property "codes" and "empty".
+ * @returns {Object} object with property "codes" and "empty".
  * "empty" is whether argument for variable is actually specified.
  * {this} and variable length argument can be empty
  */
@@ -284,13 +284,15 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     // TODO implement locale handling logic.. very poor logic..
     return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_LOCAL_VAR,
         localVar.getName());
-  } else if (code instanceof sahagin.LocalVarAssign) {
+  } else if (code instanceof sahagin.VarAssign) {
     var assign = code;
+    var variableTestDoc = sahagin.TestDocResolver.methodTestDocSub(
+        assign.getVariable(), placeholderResolvedParentMethodArgTestDocs);
     var valueTestDoc = sahagin.TestDocResolver.methodTestDocSub(
         assign.getValue(), placeholderResolvedParentMethodArgTestDocs);
     // TODO implement locale handling logic.. very poor logic..
-    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_LOCAL_VAR_ASSIGN,
-        assign.getName(), valueTestDoc);
+    return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_VAR_ASSIGN,
+        valueTestDoc, variableTestDoc);
   } else {
     return code.getOriginal();
   }

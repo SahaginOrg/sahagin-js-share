@@ -73,7 +73,7 @@ sahagin.CodeLine.prototype.toYamlObject = function() {
   var result = new Object();
   result['tartLine'] = this.startLine;
   result['endLine'] = this.endLine;
-  result['code'] = this.code.toYamlObject();
+  result['code'] = sahagin.YamlUtils.toYamlObject(this.code);
   return result;
 };
 

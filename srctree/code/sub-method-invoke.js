@@ -128,7 +128,7 @@ sahagin.SubMethodInvoke.prototype.toYamlObject = function() {
     result['args'] = sahagin.YamlUtils.toYamlObjectList(this.args);
   }
   if (this.thisInstance != null) {
-    result['thisInstance'] = this.thisInstance.toYamlObject();
+    result['thisInstance'] = sahagin.YamlUtils.toYamlObject(this.thisInstance);
   }
   if (this.childInvoke) {
       result["childInvoke"] = this.childInvoke;
@@ -150,11 +150,7 @@ sahagin.SubMethodInvoke.prototype.fromYamlObject = function(yamlObject) {
     this.args.push(code);
   }
   var thisInstanceYamlObj = sahagin.YamlUtils.getYamlObjectValue(yamlObject, 'thisInstance', true);
-  if (thisInstanceYamlObj == null) {
-    this.thisInstance = null;
-  } else {
-    this.thisInstance = sahagin.Code.newInstanceFromYamlObject(thisInstanceYamlObj);
-  }
+  this.thisInstance = sahagin.Code.newInstanceFromYamlObject(thisInstanceYamlObj);
   var childInvokeObj = sahagin.YamlUtils.getBooleanValue(yamlObject, 'childInvoke', true);
   if (childInvokeObj === null) {
       this.childInvoke = false;

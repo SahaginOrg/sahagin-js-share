@@ -34,7 +34,7 @@ sahagin.TestMethodTable.prototype.isEmpty = function() {
 /**
  * returns null if not found
  * @param {string} key
- * @return {sahagin.TestMethod}
+ * @returns {sahagin.TestMethod}
  */
 sahagin.TestMethodTable.prototype.getByKey = function(key) {
   if (key == null || key == undefined) {
@@ -52,7 +52,7 @@ sahagin.TestMethodTable.prototype.getByKey = function(key) {
 /**
  * @param {string} classQualifiedName
  * @param {string} methodSimpleName
- * @return {Array.<sahagin.TestMethod>}
+ * @returns {Array.<sahagin.TestMethod>}
  */
 sahagin.TestMethodTable.prototype.getByName = function(
     classQualifiedName, methodSimpleName) {

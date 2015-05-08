@@ -60,6 +60,10 @@ sahagin.Code.prototype.fromYamlObject = function(yamlObject) {
  * @returns {sahagin.Code}
  */
 sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
+  if (yamlObject === null) {
+    return null;
+  }
+
   var type = sahagin.YamlUtils.getStrValue(yamlObject, 'type');
   var result;
   if (type == sahagin.StringCode.TYPE) {
@@ -68,10 +72,12 @@ sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
     result = new sahagin.MethodArgument();
   } else if (type == sahagin.SubMethodInvoke.TYPE) {
     result = new sahagin.SubMethodInvoke();
+  } else if (type == sahagin.Field.TYPE) {
+    result = new sahagin.Field();
   } else if (type == sahagin.LocalVar.TYPE) {
     result = new sahagin.LocalVar();
-  } else if (type == sahagin.LocalVarAssign.TYPE) {
-    result = new sahagin.LocalVarAssign();
+  } else if (type == sahagin.VarAssign.TYPE) {
+    result = new sahagin.VarAssign();
   } else if (type == sahagin.TestStep.TYPE) {
     result = new sahagin.TestStep();
   } else if (type == sahagin.TestStepLabel.TYPE) {
