@@ -416,6 +416,12 @@ sahagin.TestDocResolver.codePage = function(code) {
     if (valuePage != null) {
       return valuePage;
     }
+  } else if (code instanceof sahagin.ClassInstance) {
+    var classInstance = code;
+    var testClass = classInstance.getTestClass()
+    if (testClass instanceof sahagin.PageClass) {
+        return testClass;
+    }
   }
   return null;
 };
