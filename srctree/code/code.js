@@ -78,6 +78,8 @@ sahagin.Code.newInstanceFromYamlObject = function(yamlObject) {
     result = new sahagin.LocalVar();
   } else if (type == sahagin.VarAssign.TYPE) {
     result = new sahagin.VarAssign();
+  } else if (type == sahagin.ClassInstance.TYPE) {
+    result = new sahagin.ClassInstance();
   } else if (type == sahagin.TestStep.TYPE) {
     result = new sahagin.TestStep();
   } else if (type == sahagin.TestStepLabel.TYPE) {

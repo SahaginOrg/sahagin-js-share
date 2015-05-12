@@ -332,6 +332,10 @@ sahagin.SrcTree.prototype.resolveKeyReferenceInCode = function(code) {
     var assign = code;
     this.resolveKeyReferenceInCode(assign.getVariable());
     this.resolveKeyReferenceInCode(assign.getValue());
+  } else if (code instanceof sahagin.ClassInstance) {
+    var classInstance = code;
+    var testClass = this.getTestClassByKey(classInstance.getTestClassKey());
+    classInstance.setTestClass(testClass);
   } else if (code instanceof sahagin.TestStep) {
     var testStep = code;
     for (var i = 0; i < testStep.getStepBody().length; i++) {

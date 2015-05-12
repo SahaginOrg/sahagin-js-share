@@ -288,10 +288,10 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     var field = code;
     var testDoc = field.getField().getTestDoc();
     if (testDoc == null) {
-        // TODO resolve {this} keyword in the testDoc of the Field
-        return code.getOriginal();
+      // TODO resolve {this} keyword in the testDoc of the Field
+      return code.getOriginal();
     } else {
-        return testDoc;
+      return testDoc;
     }
   } else if (code instanceof sahagin.VarAssign) {
     var assign = code;
@@ -302,6 +302,36 @@ sahagin.TestDocResolver.methodTestDocSub = function(
     // TODO implement locale handling logic.. very poor logic..
     return sahagin.CommonUtils.strFormat(sahagin.TestDocResolver.JS_VAR_ASSIGN,
         valueTestDoc, variableTestDoc);
+  } else if (code instanceof sahagin.ClassInstance) {
+    var classInstance = code;
+    var testDoc = classInstance.getTestClass().getTestDoc();
+    if (testDoc == null || testDoc == "") {
+      return classInstance.getTestClass().getSimpleName();
+    } else {
+      return testDoc;
+    }
+  } else if (code instanceof sahagin.TestStep) {
+    var testStep = code;
+    var result = "";
+    if (testStep.getLabel() != null) {
+      result = testStep.getLabel() + ": ";
+    }
+    if (testStep.getText() != null) {
+      result = result + testStep.getText();
+    }
+    return result;
+  } else if (code instanceof sahagin.TestStepLabel) {
+    var testStepLabel = code;
+    var result = "";
+    if (testStepLabel.getLabel() != null) {
+      // testStep text does not contain placeholder
+      result = testStepLabel.getLabel() + ": ";
+    }
+    if (testStepLabel.getText() != null) {
+      // testStepLabel text does not contain placeholder
+      result = result + testStepLabel.getText();
+    }
+    return result;
   } else {
     return code.getOriginal();
   }
